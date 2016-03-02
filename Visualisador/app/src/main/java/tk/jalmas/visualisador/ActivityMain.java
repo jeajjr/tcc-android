@@ -12,5 +12,9 @@ public class ActivityMain extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, new FragmentGraph())
+                .commit();
     }
 }
