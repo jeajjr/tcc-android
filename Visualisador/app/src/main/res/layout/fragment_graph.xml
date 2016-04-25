@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="tk.jalmas.visualisador.FragmentGraph"
+    tools:context="tk.jalmas.tcc.visualisador.FragmentGraph"
     android:background="#ffffffff"
     android:padding="16sp"
     >
@@ -106,6 +106,18 @@
             android:id="@+id/triggerSelectorDown"
             />
     </LinearLayout>
+
+    <ImageButton
+        android:layout_width="32sp"
+        android:layout_height="32sp"
+        android:background="#00000000"
+        android:scaleType="fitCenter"
+        android:src="@drawable/button"
+        android:id="@+id/toggle"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        />
 
     <com.jjoe64.graphview.GraphView
         android:layout_width="fill_parent"

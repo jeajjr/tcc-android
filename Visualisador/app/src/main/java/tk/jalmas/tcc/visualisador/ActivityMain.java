@@ -1,16 +1,13 @@
-package tk.jalmas.visualisador;
+package tk.jalmas.tcc.visualisador;
 
-import android.app.Activity;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-/**
- * Created by jeajjr on 15/09/2015.
- */
-public class ActivityMain extends Activity {
+public class ActivityMain extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
         getFragmentManager().beginTransaction()

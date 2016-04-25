@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 23
+    buildToolsVersion "24.0.0 rc3"
 
     defaultConfig {
-        applicationId "tk.jalmas.visualisador"
-        minSdkVersion 15
-        targetSdkVersion 22
+        applicationId "tk.jalmas.tcc.visualisador"
+        minSdkVersion 22
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }
@@ -21,7 +21,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.0.0'
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.+'
     compile files('libs/GraphView-4.0.1.jar')
-
 }
