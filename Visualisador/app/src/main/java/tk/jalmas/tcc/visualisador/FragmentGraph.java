@@ -35,7 +35,7 @@ public class FragmentGraph extends Fragment {
     Runnable refresherRunnable = new Runnable() {
         @Override
         public void run() {
-            updateGraph();
+            //updateGraph();
 
             refreshHandler.postDelayed(refresherRunnable, 100);
         }
@@ -43,7 +43,7 @@ public class FragmentGraph extends Fragment {
     public FragmentGraph() {
         // Required empty public constructor
     }
-
+/*
     private void updateGraph(){
         if (periodical++ != 0) {
             int size = 40;
@@ -54,6 +54,13 @@ public class FragmentGraph extends Fragment {
             }
             graph.updateData(data);
         }
+    }
+*/
+private void updateGraph(int[] data, int lastPosition){
+        MySimpleGraph.DataPoint[] points = new MySimpleGraph.DataPoint[data.length];
+        for (int i = 0; i < data.length; i++)
+            points [i] = new MySimpleGraph.DataPoint((float) i, (float) data[i]);
+        graph.updateData(points, lastPosition);
     }
 
     @Override
@@ -83,13 +90,15 @@ public class FragmentGraph extends Fragment {
             }
 
             @Override
-            public void onUpdate(int[] data, final int lastPosition) {
+            public void onUpdate(final int[] data, final int lastPosition) {
                 //System.out.println("onUpdate received " + lastPosition);
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         timeScaleText.setText("" + lastPosition);
+
+                        updateGraph(data, lastPosition);
                     }
                 });
             }

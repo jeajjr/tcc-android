@@ -10,6 +10,10 @@ import android.view.View;
 public class MySimpleGraph extends View {
     private DataPoint[] data;
 
+    private boolean isLastPositionEnabled;
+    private int lastPosition;
+    private final int OFFSET = 50;
+
     private Paint axisPaint;
     private Paint gridPaint;
     private Paint pointPaint;
@@ -25,6 +29,9 @@ public class MySimpleGraph extends View {
     private final int POINT_STROKE = 2;
 
     public void init() {
+        isLastPositionEnabled = false;
+        lastPosition = 0;
+
         axisPaint = new Paint(Color.BLACK);
         axisPaint.setStrokeWidth(AXIS_STROKE);
 
@@ -102,7 +109,8 @@ public class MySimpleGraph extends View {
                 //canvas.drawCircle(newX, newY, POINT_RADIUS, pointPaint);
                 //System.out.printf("(%f, %f) -> (%d, %d)\n", data[i].x, data[i].y, newX, newY);
 
-                if (i != 0)
+                if (!isLastPositionEnabled || i < lastPosition || (lastPosition + OFFSET) < i)
+                    if (i != 0)
                     canvas.drawLine(lastX, lastY, newX, newY, pointPaint);
 
                 lastX = newX;
@@ -113,6 +121,15 @@ public class MySimpleGraph extends View {
 
     public void updateData(DataPoint[] data) {
         this.data = data;
+        isLastPositionEnabled = false;
+
+        this.invalidate();
+    }
+
+    public void updateData(DataPoint[] data, int lastPosition) {
+        this.data = data;
+        isLastPositionEnabled = true;
+        this.lastPosition = lastPosition;
 
         this.invalidate();
     }
