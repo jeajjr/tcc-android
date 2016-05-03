@@ -44,6 +44,8 @@ public class Settings {
             "1ms", "5ms", "10ms", "50ms", "100ms", "200ms", "500ms", "1s"};
 
     private static char currentTimeScale = TIME_SCALE_500MS;
+    private static char LAST_TIME_SCALE_CONT = Settings.TIME_SCALE_1S;
+    private static char LAST_TIME_SCALE_BULK = Settings.TIME_SCALE_10MS;
 
     // number of samples in a time frame (osciloscope screen)
     private static final char HOLD_OFF_START_VALUE = 0;
@@ -56,6 +58,7 @@ public class Settings {
     private static final char CHANNEL_2 = 0x02;
 
     public static char composeTimeScaleCommand() {
+        System.out.println("composeTimeScaleCommand " + TIME_SCALE_LABELS[currentTimeScale]);
         return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TIME_SCALE) | (MASK_COMMAND_VALUE & currentTimeScale)) & 0xFF);
     }
 
@@ -64,6 +67,32 @@ public class Settings {
             return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TRIGGER_LEVEL) | (MASK_COMMAND_VALUE & currentTriggerValue)) & 0xFF);
         else
             return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TRIGGER_LEVEL) | (MASK_COMMAND_VALUE & TRIGGER_LEVEL_OFF)) & 0xFF);
+    }
+
+    public static char getSetLastTimeScaleBulkCommand() {
+        System.out.println("getSetLastTimeScaleBulkCommand " + TIME_SCALE_LABELS[LAST_TIME_SCALE_BULK]);
+
+        currentTimeScale = LAST_TIME_SCALE_BULK;
+
+        return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TIME_SCALE) | (MASK_COMMAND_VALUE & LAST_TIME_SCALE_BULK)) & 0xFF);
+    }
+
+    public static char getSetLastTimeScaleContinuousCommand() {
+        System.out.println("getSetLastTimeScaleContinuousCommand  " + TIME_SCALE_LABELS[LAST_TIME_SCALE_CONT]);
+
+        currentTimeScale = LAST_TIME_SCALE_CONT;
+
+        return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TIME_SCALE) | (MASK_COMMAND_VALUE & LAST_TIME_SCALE_CONT)) & 0xFF);
+    }
+
+    public static void setCurrentTimeScaleAsLastBulk() {
+        LAST_TIME_SCALE_BULK = currentTimeScale;
+        System.out.println("LAST_TIME_SCALE_BULK set as " + TIME_SCALE_LABELS[LAST_TIME_SCALE_BULK]);
+    }
+
+    public static void setCurrentTimeScaleAsLastContinuous() {
+        LAST_TIME_SCALE_CONT = currentTimeScale;
+        System.out.println("LAST_TIME_SCALE_BULK set as " + TIME_SCALE_LABELS[LAST_TIME_SCALE_CONT]);
     }
 
     public static String getCurrentTimeScaleLabel() {

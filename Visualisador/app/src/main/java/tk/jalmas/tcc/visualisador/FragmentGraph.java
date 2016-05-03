@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 /**
@@ -26,7 +27,7 @@ public class FragmentGraph extends Fragment {
         public void run() {
             if (receiver != null) {
                 receiver.sendCommand(Settings.composeTimeScaleCommand());
-                //receiver.sendCommand(Settings.composeTriggerCommand());
+                receiver.sendCommand(Settings.composeTriggerCommand());
             }
 
             refreshHandler.postDelayed(refresherRunnable, 2000);
@@ -35,19 +36,7 @@ public class FragmentGraph extends Fragment {
     public FragmentGraph() {
         // Required empty public constructor
     }
-/*
-    private void updateGraph(){
-        if (periodical++ != 0) {
-            int size = 40;
-            MySimpleGraph.DataPoint[] data = new MySimpleGraph.DataPoint[size];
-            for (int i = 0; i < size; i++) {
-                float sin = (float) (128.0 * Math.sin(2.0 * Math.PI * i / (size / 1) + ((double) periodical * 0.001) ) + 128.0);
-                data[i] = new MySimpleGraph.DataPoint((float) i, sin);
-            }
-            graph.updateData(data);
-        }
-    }
-*/
+
     private void updateGraph(int[] data, int lastPosition){
         MySimpleGraph.DataPoint[] points = new MySimpleGraph.DataPoint[data.length];
         for (int i = 0; i < data.length; i++)
@@ -101,13 +90,55 @@ public class FragmentGraph extends Fragment {
             }
         });
 
+        receiver.setErrorHandler(new ErrorHandler() {
+            @Override
+            public void onErrorOccurred() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showErrorDialog();
+                    }
+                });
+            }
+        });
+
+        receiver.setOnChangeSendingModeListener(new OnSendingModeChangeListener() {
+            @Override
+            public void onChangeToBulk() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(), "onChangeToBulk", Toast.LENGTH_SHORT).show();
+
+                        Settings.setCurrentTimeScaleAsLastContinuous();
+                        updateSettingOnDevice(Settings.getSetLastTimeScaleBulkCommand());
+                        timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
+                    }
+                });
+            }
+
+            @Override
+            public void onChangeToContinuous() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(), "onChangeToContinuous", Toast.LENGTH_SHORT).show();
+
+                        Settings.setCurrentTimeScaleAsLastBulk();
+                        updateSettingOnDevice(Settings.getSetLastTimeScaleContinuousCommand());
+                        timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
+                    }
+                });
+            }
+        });
+
         receiver.start();
 
         v.findViewById(R.id.toggle).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Settings.setIsTriggerEnabled(!Settings.isTriggerEnabled());
-
+                updateTriggerSettingsOnDevice();
             }
         });
 
@@ -117,7 +148,12 @@ public class FragmentGraph extends Fragment {
             @Override
             public void onClick(View v) {
                 Settings.decreaseTimeScale();
-                timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
+                updateTimeScaleText();
+                if (receiver != null && receiver.getCurrentState() == Receiver.STATES.CONTINUOUS)
+                    Settings.setCurrentTimeScaleAsLastContinuous();
+                else
+                    Settings.setCurrentTimeScaleAsLastBulk();
+                updateTimeScaleOnDevice();
             }
         });
 
@@ -125,11 +161,39 @@ public class FragmentGraph extends Fragment {
             @Override
             public void onClick(View v) {
                 Settings.increaseTimeScale();
-                timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
+                updateTimeScaleText();
+                if (receiver != null && receiver.getCurrentState() == Receiver.STATES.CONTINUOUS)
+                    Settings.setCurrentTimeScaleAsLastContinuous();
+                else
+                    Settings.setCurrentTimeScaleAsLastBulk();
+                updateTimeScaleOnDevice();
             }
         });
 
         return v;
+    }
+
+    private void updateTimeScaleText() {
+        timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
+    }
+
+    private void updateTimeScaleOnDevice() {
+        if (receiver != null)
+            receiver.sendCommand(Settings.composeTriggerCommand());
+    }
+
+    private void updateTriggerSettingsOnDevice() {
+        if (receiver != null)
+            receiver.sendCommand(Settings.composeTriggerCommand());
+    }
+
+    private void updateSettingOnDevice(char command) {
+        if (receiver != null)
+            receiver.sendCommand(command);
+    }
+
+    private void showErrorDialog() {
+        Toast.makeText(getActivity(), "Error on connecting", Toast.LENGTH_LONG).show();
     }
 
     @Override

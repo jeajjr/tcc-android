@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothSocket;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,7 +15,7 @@ import java.util.UUID;
  * Created by jeajjr on 27/04/2016.
  */
 public class Receiver extends Thread {
-    private enum STATES {CONTINUOUS, BULK_IN, BULK_OUT};
+    public enum STATES {CONTINUOUS, BULK_IN, BULK_OUT};
     private STATES currentState;
 
     private final int[] SUB_ARRAY_OK = {'O', 'K'};
@@ -48,6 +47,8 @@ public class Receiver extends Thread {
 
 
     private Updater updater;
+    private ErrorHandler errorHandler;
+    private OnSendingModeChangeListener modeChangeListener;
 
     BluetoothSocket btSocket;
     private DataInputStream dataIS;
@@ -81,13 +82,26 @@ public class Receiver extends Thread {
     public void setUpdater(Updater updater) {
         this.updater = updater;
     }
+
+    public void setErrorHandler(ErrorHandler errorHandler) {
+        this.errorHandler = errorHandler;
+    }
+
+    public void setOnChangeSendingModeListener(OnSendingModeChangeListener modeChangeListener) {
+        this.modeChangeListener = modeChangeListener;
+    }
+
+    public STATES getCurrentState() {
+        return currentState;
+    }
+
     public void run() {
         try {
             BluetoothAdapter myBluetooth = BluetoothAdapter.getDefaultAdapter();
             Set<BluetoothDevice> btDevices = myBluetooth.getBondedDevices();
             BluetoothDevice dispositivo = null;
 
-            System.out.println("Listing devices:");
+            System.out.println("Listing devices: ");
             for (BluetoothDevice dev : btDevices) {
                 System.out.println("BT : " + dev.getName() + "," + dev.getAddress());
 
@@ -115,6 +129,9 @@ public class Receiver extends Thread {
         catch (IOException e) {
             e.printStackTrace();
 
+            if (errorHandler != null)
+                errorHandler.onErrorOccurred();
+
             cleanup();
         }
     }
@@ -124,7 +141,7 @@ public class Receiver extends Thread {
             return false;
 
         try {
-            System.out.println("command " + (int) a);
+            //System.out.println("command " + (int) a);
             dataOS.writeChar(a);
         }
         catch (IOException e) {
@@ -173,6 +190,10 @@ public class Receiver extends Thread {
                 if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_USP_BK), SUB_ARRAY_USP_BK)) {
                     changeCurrentState(STATES.BULK_IN);
                     System.out.println("Detected change to BULK mode");
+
+                    if (modeChangeListener != null) {
+                        modeChangeListener.onChangeToBulk();
+                    }
                 }
 
                 break;
@@ -212,6 +233,10 @@ public class Receiver extends Thread {
             if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_USP_OK), SUB_ARRAY_USP_OK)) {
                 System.out.println("Detected change to CONTINUOUS mode");
                 changeCurrentState(STATES.CONTINUOUS);
+
+                if (modeChangeListener != null) {
+                    modeChangeListener.onChangeToContinuous();
+                }
             }
         }
 
