@@ -1,21 +1,13 @@
 package tk.jalmas.tcc.visualisador;
 
 
-import android.bluetooth.BluetoothAdapter;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
-
-import tk.jalmas.tcc.visualisador.R;
 
 
 /**
@@ -24,20 +16,20 @@ import tk.jalmas.tcc.visualisador.R;
 public class FragmentGraph extends Fragment {
     private static final String TAG = FragmentGraph.class.getName();
 
-    //private GraphView graph;
-
-    static int periodical = 0;
-
     private MySimpleGraph graph;
     private TextView timeScaleText;
+    private Receiver receiver;
 
     private Handler refreshHandler = null;
     Runnable refresherRunnable = new Runnable() {
         @Override
         public void run() {
-            //updateGraph();
+            if (receiver != null) {
+                receiver.sendCommand(Settings.composeTimeScaleCommand());
+                //receiver.sendCommand(Settings.composeTriggerCommand());
+            }
 
-            refreshHandler.postDelayed(refresherRunnable, 100);
+            refreshHandler.postDelayed(refresherRunnable, 2000);
         }
     };
     public FragmentGraph() {
@@ -56,11 +48,20 @@ public class FragmentGraph extends Fragment {
         }
     }
 */
-private void updateGraph(int[] data, int lastPosition){
+    private void updateGraph(int[] data, int lastPosition){
         MySimpleGraph.DataPoint[] points = new MySimpleGraph.DataPoint[data.length];
         for (int i = 0; i < data.length; i++)
             points [i] = new MySimpleGraph.DataPoint((float) i, (float) data[i]);
-        graph.updateData(points, lastPosition);
+
+        if (lastPosition == -1)
+            graph.updateData(points);
+        else
+            graph.updateData(points, lastPosition);
+
+    }
+
+    private void updateGraph(int[] data){
+        updateGraph(data, -1);
     }
 
     @Override
@@ -72,21 +73,19 @@ private void updateGraph(int[] data, int lastPosition){
         graph = (MySimpleGraph) v.findViewById(R.id.graph);
         timeScaleText = (TextView) v.findViewById(R.id.timeScaleText);
 
-        v.findViewById(R.id.toggle).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "toggle button");
-            }
-        });
-
         refreshHandler = new Handler();
-        //refresherRunnable.run();
+        refresherRunnable.run();
 
-        Receiver receiver = new Receiver(getActivity());
+        receiver = new Receiver(getActivity());
         receiver.setUpdater(new Updater() {
             @Override
-            public void onUpdate(int[] data) {
-
+            public void onUpdate(final int[] data) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateGraph(data);
+                    }
+                });
             }
 
             @Override
@@ -96,8 +95,6 @@ private void updateGraph(int[] data, int lastPosition){
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        timeScaleText.setText("" + lastPosition);
-
                         updateGraph(data, lastPosition);
                     }
                 });
@@ -106,41 +103,40 @@ private void updateGraph(int[] data, int lastPosition){
 
         receiver.start();
 
-/*
-        for (int i = -offset; i < nSamples - offset; i++)
-            dataPoints[i + offset] = new DataPoint(i * 2 * Math.PI/nSamples, Math.sin(i * 2 * Math.PI/nSamples));
-
-        graph = (GraphView) v.findViewById(R.id.graph);
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(dataPoints);
-        graph.addSeries(series);
-        graph.onDataChanged(false, false);
-
         v.findViewById(R.id.toggle).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "toggle button");
+                Settings.setIsTriggerEnabled(!Settings.isTriggerEnabled());
 
             }
         });
 
-        v.findViewById(R.id.voltageScaleSelectorUp).setOnClickListener(new View.OnClickListener() {
+        timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
+
+        v.findViewById(R.id.timeScaleSelectorDown).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Log.d(TAG, "voltageScaleSelectorUp");
-
-                //graph.setScrollY((int) (graph.getScaleY() / 2.0f));
+            public void onClick(View v) {
+                Settings.decreaseTimeScale();
+                timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
             }
         });
 
-        v.findViewById(R.id.voltageScaleSelectorDown).setOnClickListener(new View.OnClickListener() {
+        v.findViewById(R.id.timeScaleSelectorUp).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Log.d(TAG, "voltageScaleSelectorDown");
+            public void onClick(View v) {
+                Settings.increaseTimeScale();
+                timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
             }
         });
-
-        */
 
         return v;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (receiver != null)
+            receiver.cleanup();
     }
 }

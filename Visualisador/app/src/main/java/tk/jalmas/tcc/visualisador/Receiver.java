@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
@@ -47,7 +48,10 @@ public class Receiver extends Thread {
 
 
     private Updater updater;
+
+    BluetoothSocket btSocket;
     private DataInputStream dataIS;
+    private DataOutputStream dataOS;
 
     private UUID myUUID;
 
@@ -59,6 +63,8 @@ public class Receiver extends Thread {
         this.context = context;
         //myUUID = UUID.fromString(((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId());
         myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+        btSocket = null;
 
         if (BUFFER_SIZE % CONTINUOUS_BLOCK_SIZE != 0) {
             System.out.println("Error: BUFFER_SIZE must be a multiple of CONTINUOUS_BLOCK_SIZE");
@@ -76,21 +82,12 @@ public class Receiver extends Thread {
         this.updater = updater;
     }
     public void run() {
-        BluetoothSocket btSocket = null;
-/*
-        if (updater != null)
-            updater.onUpdate(null, 66);
-            */
-
         try {
             BluetoothAdapter myBluetooth = BluetoothAdapter.getDefaultAdapter();
-
             Set<BluetoothDevice> btDevices = myBluetooth.getBondedDevices();
-
             BluetoothDevice dispositivo = null;
-            boolean gotit = false;
 
-                    System.out.println("Listing devices");
+            System.out.println("Listing devices:");
             for (BluetoothDevice dev : btDevices) {
                 System.out.println("BT : " + dev.getName() + "," + dev.getAddress());
 
@@ -102,9 +99,10 @@ public class Receiver extends Thread {
 
             btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);
             BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-            btSocket.connect();//start connection
-            InputStream in = btSocket.getInputStream();
-            dataIS = new DataInputStream(in);
+            btSocket.connect();
+
+            dataIS = new DataInputStream(btSocket.getInputStream());
+            dataOS = new DataOutputStream(btSocket.getOutputStream());
 
             while (true) {
                 buffer[buffIndex] = readCharacters();
@@ -117,18 +115,24 @@ public class Receiver extends Thread {
         catch (IOException e) {
             e.printStackTrace();
 
-            try {
-                dataIS.close();
-            }
-            catch (IOException e1) {}
-
-            try {
-            if (btSocket != null)
-                btSocket.close();
-            }
-            catch (IOException e1) {}
-
+            cleanup();
         }
+    }
+
+    public boolean sendCommand(char a) {
+        if (dataOS == null)
+            return false;
+
+        try {
+            System.out.println("command " + (int) a);
+            dataOS.writeChar(a);
+        }
+        catch (IOException e) {
+            //e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 
     private char readCharacters() throws IOException{
@@ -297,4 +301,23 @@ public class Receiver extends Thread {
         return index;
     }
 
+    public void cleanup() {
+        try {
+            if (dataIS != null)
+                dataIS.close();
+        }
+        catch (IOException e1) {}
+
+        try {
+            if (dataOS != null)
+                dataOS.close();
+        }
+        catch (IOException e1) {}
+
+        try {
+            if (btSocket != null)
+                btSocket.close();
+        }
+        catch (IOException e1) {}
+    }
 }
