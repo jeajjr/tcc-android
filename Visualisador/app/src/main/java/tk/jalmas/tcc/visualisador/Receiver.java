@@ -29,8 +29,8 @@ public class Receiver extends Thread {
     private int buffIndex;
     private int currentMessageStart;
 
-    private final int BUFFER_SIZE = 1500;
-    private final int CONTINUOUS_BLOCK_SIZE = 500;
+    private final int BUFFER_SIZE = 512 * 4;
+    private final int CONTINUOUS_BLOCK_SIZE = 512;
 
     // index where the first byte of the message length is
     private final int LENGTH_START_INDEX =  3;
@@ -101,7 +101,7 @@ public class Receiver extends Thread {
             Set<BluetoothDevice> btDevices = myBluetooth.getBondedDevices();
             BluetoothDevice dispositivo = null;
 
-            System.out.println("Listing devices: ");
+            System.out.println("Listing devices:");
             for (BluetoothDevice dev : btDevices) {
                 System.out.println("BT : " + dev.getName() + "," + dev.getAddress());
 

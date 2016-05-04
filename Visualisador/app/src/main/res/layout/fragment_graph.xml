@@ -108,29 +108,35 @@
             />
     </LinearLayout>
 
-    <ImageButton
-        android:layout_width="32sp"
-        android:layout_height="32sp"
-        android:background="#00000000"
-        android:scaleType="fitCenter"
-        android:src="@drawable/button"
-        android:id="@+id/toggle"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        />
-
-    <!--<com.jjoe64.graphview.GraphView -->
     <tk.jalmas.tcc.visualisador.MySimpleGraph
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/graph"
         android:layout_marginLeft="12sp"
         android:layout_marginRight="12sp"
-        android:layout_marginBottom="12sp"
+        android:layout_marginBottom="24sp"
         android:layout_toRightOf="@id/voltageScaleSelector"
         android:layout_toLeftOf="@id/triggerSelector"
         android:layout_above="@id/timeScaleSelector"
         />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonStyleSmall"
+        android:id="@+id/triggerButton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:text="TRIG: OFF"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/buttonStyleSmall"
+        android:id="@+id/startStopButton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:text="STOP"
+        />
 </RelativeLayout>

@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +21,8 @@ public class FragmentGraph extends Fragment {
     private MySimpleGraph graph;
     private TextView timeScaleText;
     private Receiver receiver;
+
+    private boolean isGraphStopped;
 
     private Handler refreshHandler = null;
     Runnable refresherRunnable = new Runnable() {
@@ -38,6 +41,9 @@ public class FragmentGraph extends Fragment {
     }
 
     private void updateGraph(int[] data, int lastPosition){
+        if (isGraphStopped)
+            return;
+
         MySimpleGraph.DataPoint[] points = new MySimpleGraph.DataPoint[data.length];
         for (int i = 0; i < data.length; i++)
             points [i] = new MySimpleGraph.DataPoint((float) i, (float) data[i]);
@@ -134,11 +140,17 @@ public class FragmentGraph extends Fragment {
 
         receiver.start();
 
-        v.findViewById(R.id.toggle).setOnClickListener(new View.OnClickListener() {
+        final Button triggerButton = (Button) v.findViewById(R.id.triggerButton);
+        triggerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Settings.setIsTriggerEnabled(!Settings.isTriggerEnabled());
                 updateTriggerSettingsOnDevice();
+
+                if (Settings.isTriggerEnabled())
+                    triggerButton.setText("TRIG: ON");
+                else
+                    triggerButton.setText("TRIG: OFF");
             }
         });
 
@@ -167,6 +179,20 @@ public class FragmentGraph extends Fragment {
                 else
                     Settings.setCurrentTimeScaleAsLastBulk();
                 updateTimeScaleOnDevice();
+            }
+        });
+
+        isGraphStopped = false;
+        final Button startStopButton = (Button) v.findViewById(R.id.startStopButton);
+        startStopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isGraphStopped = !isGraphStopped;
+                if (isGraphStopped)
+                    startStopButton.setText("START");
+                else
+                    startStopButton.setText("STOP");
+
             }
         });
 
