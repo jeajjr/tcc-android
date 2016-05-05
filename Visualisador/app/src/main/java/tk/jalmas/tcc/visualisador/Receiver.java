@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothSocket;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -97,23 +98,12 @@ public class Receiver extends Thread {
 
     public void run() {
         try {
-            BluetoothAdapter myBluetooth = BluetoothAdapter.getDefaultAdapter();
-            Set<BluetoothDevice> btDevices = myBluetooth.getBondedDevices();
-            BluetoothDevice dispositivo = null;
-
-            System.out.println("Listing devices:");
-            for (BluetoothDevice dev : btDevices) {
-                System.out.println("BT : " + dev.getName() + "," + dev.getAddress());
-
-                if (dev.getName().compareTo(DEVICE_NAME) == 0) {
-                    dispositivo = dev;
-                    break;
-                }
+            while (!initConnection()) {
+                Thread.sleep(1000);
+                System.out.println("initConnection failed, trying again");
             }
 
-            btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);
-            BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-            btSocket.connect();
+            System.out.println("initConnection was successful");
 
             dataIS = new DataInputStream(btSocket.getInputStream());
             dataOS = new DataOutputStream(btSocket.getOutputStream());
@@ -131,9 +121,54 @@ public class Receiver extends Thread {
 
             if (errorHandler != null)
                 errorHandler.onErrorOccurred();
-
+        }
+        catch (InterruptedException e) {
+            System.out.println("sleep failed");
+        }
+        finally {
             cleanup();
         }
+    }
+
+    private boolean initConnection() {
+        try {
+            BluetoothAdapter myBluetooth = BluetoothAdapter.getDefaultAdapter();
+            if (myBluetooth == null) {
+                System.out.println("no bluetooth adapter found");
+                return false;
+            }
+
+            Set<BluetoothDevice> btDevices = myBluetooth.getBondedDevices();
+            BluetoothDevice dispositivo = null;
+
+            System.out.println("Listing devices:");
+            for (BluetoothDevice dev : btDevices) {
+                System.out.println("BT : " + dev.getName() + "," + dev.getAddress());
+
+                if (dev.getName().compareTo(DEVICE_NAME) == 0) {
+                    dispositivo = dev;
+                    break;
+                }
+            }
+
+            if (dispositivo == null)
+                return false;
+
+            btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);
+            BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+            btSocket.connect();
+
+            if (!btSocket.isConnected()) {
+                System.out.println("Bluetooth device not connected");
+                return false;
+            }
+        }
+        catch (IOException e) {
+            System.out.println("caught IOException: " + e.getMessage());
+            return false;
+        }
+
+        return true;
     }
 
     public boolean sendCommand(char a) {
@@ -211,10 +246,10 @@ public class Receiver extends Thread {
                     }
 
                 if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_OK), SUB_ARRAY_OK)) {
-                    System.out.println("Detected end of message");
+                    System.out.println("Detected end of message: " + bulkMsgLen);
                     changeCurrentState(STATES.BULK_OUT);
                     if (updater != null)
-                        updater.onUpdate(getSubArray(buffer, buffIndex, getMessageSize()));
+                        updater.onUpdate(getSubArray(buffer, buffIndex, bulkMsgLen /*getMessageSize()*/));
                 }
 
                 break;
