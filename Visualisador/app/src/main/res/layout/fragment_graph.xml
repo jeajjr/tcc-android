@@ -1,142 +1,360 @@
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="tk.jalmas.tcc.visualisador.FragmentGraph"
     android:background="#ffffffff"
-    android:padding="16sp"
+    android:paddingLeft="10sp"
+    android:paddingRight="10sp"
+    android:paddingTop="10sp"
+    android:orientation="vertical"
     >
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:layout_alignParentLeft="true"
-        android:id="@+id/voltageScaleSelector"
-        android:layout_centerVertical="true"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:padding="0dp"
+        android:layout_margin="0dp"
         >
-        <ImageButton
-            android:layout_width="32sp"
-            android:layout_height="32sp"
-            android:background="#00000000"
-            android:scaleType="fitCenter"
-            android:src="@drawable/arrow_up"
-            android:id="@+id/voltageScaleSelectorUp"
-            />
-        <TextView
+
+        <!-- TRIGGER LEVEL SELECTOR -->
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:text="1V/div"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:id="@+id/triggerSelector"
+            >
+            <ImageButton
+                android:layout_width="32sp"
+                android:layout_height="32sp"
+                android:background="#00000000"
+                android:scaleType="fitCenter"
+                android:src="@drawable/arrow_up"
+                android:id="@+id/triggerSelectorUp"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="0.5V"
+                android:layout_gravity="center_horizontal"
+                />
+            <ImageButton
+                android:layout_width="32sp"
+                android:layout_height="32sp"
+                android:background="#00000000"
+                android:scaleType="fitCenter"
+                android:src="@drawable/arrow_down"
+                android:id="@+id/triggerSelectorDown"
+                />
+        </LinearLayout>
+
+        <tk.jalmas.tcc.visualisador.MySimpleGraph
+            android:layout_width="0sp"
+            android:layout_height="match_parent"
+            android:id="@+id/graph"
+            android:layout_marginLeft="12sp"
+            android:layout_marginRight="12sp"
+            android:layout_marginBottom="12sp"
+            android:layout_weight="1"
             />
-        <ImageButton
-            android:layout_width="32sp"
-            android:layout_height="32sp"
-            android:background="#00000000"
-            android:scaleType="fitCenter"
-            android:src="@drawable/arrow_down"
-            android:id="@+id/voltageScaleSelectorDown"
-            />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+            <ImageView
+                android:layout_width="32sp"
+                android:layout_height="32sp"
+                android:background="#00000000"
+                android:scaleType="fitCenter"
+                android:src="@drawable/trigger_rise_faded"
+                android:id="@+id/trigger_status"
+                />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/timeScaleSelector"
         >
-        <ImageButton
-            android:layout_width="32sp"
-            android:layout_height="32sp"
-            android:background="#00000000"
-            android:scaleType="fitCenter"
-            android:src="@drawable/arrow_left"
-            android:id="@+id/timeScaleSelectorDown"
-            />
-        <TextView
-            android:layout_width="wrap_content"
+        <Button
+            android:layout_width="70sp"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
-            android:text="20ms"
-            android:id="@+id/timeScaleText"
+            style="?android:attr/buttonStyleSmall"
+            android:id="@+id/triggerButton"
+            android:text="TRIG: OFF"
+            android:layout_gravity="center"
             />
-        <ImageButton
-            android:layout_width="32sp"
-            android:layout_height="32sp"
-            android:background="#00000000"
-            android:scaleType="fitCenter"
-            android:src="@drawable/arrow_right"
-            android:id="@+id/timeScaleSelectorUp"
+        <!-- HOLD OFF SELECTOR -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:id="@+id/holdOffSelector"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            >
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                >
+                <ImageButton
+                    android:layout_width="32sp"
+                    android:layout_height="32sp"
+                    android:background="#00000000"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/arrow_left"
+                    android:id="@+id/holdOffSelectorDown"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-1"
+                    android:textSize="@dimen/textSize_scale_limits"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/holdOffLimitMin"
+                    />
+                </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                >
+                <TextView
+                    android:layout_width="80sp"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:text="+3/4"
+                    android:id="@+id/holdOffText"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="HOLD OFF"
+                    android:textSize="@dimen/textSize_scale_name"
+                    android:layout_gravity="center_horizontal"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+                <ImageButton
+                    android:layout_width="32sp"
+                    android:layout_height="32sp"
+                    android:background="#00000000"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/arrow_right"
+                    android:id="@+id/holdOffSelectorUp"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+1"
+                    android:textSize="@dimen/textSize_scale_limits"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/holdOffLimitMax"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- TIME SCALE SELECTOR -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:id="@+id/timeScaleSelector"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            >
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+                <ImageButton
+                    android:layout_width="32sp"
+                    android:layout_height="32sp"
+                    android:background="#00000000"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/arrow_left"
+                    android:id="@+id/timeScaleSelectorDown"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1ms"
+                    android:textSize="@dimen/textSize_scale_limits"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/timeScaleLimitMin"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                >
+                <TextView
+                    android:layout_width="80sp"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:text="500ms"
+                    android:id="@+id/timeScaleText"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TIME SCALE"
+                    android:textSize="@dimen/textSize_scale_name"
+                    android:layout_gravity="center_horizontal"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+                <ImageButton
+                    android:layout_width="32sp"
+                    android:layout_height="32sp"
+                    android:background="#00000000"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/arrow_right"
+                    android:id="@+id/timeScaleSelectorUp"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5s"
+                    android:textSize="@dimen/textSize_scale_limits"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/timeScaleLimitMax"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- OFFSET SELECTOR -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:id="@+id/offsetSelector"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            >
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                >
+                <ImageButton
+                    android:layout_width="32sp"
+                    android:layout_height="32sp"
+                    android:background="#00000000"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/arrow_left"
+                    android:id="@+id/offsetSelectorDown"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-50%"
+                    android:textSize="@dimen/textSize_scale_limits"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/offsetLimitMin"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                >
+                <TextView
+                    android:layout_width="80sp"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:text="+20%"
+                    android:id="@+id/offsetText"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="OFFSET"
+                    android:textSize="@dimen/textSize_scale_name"
+                    android:layout_gravity="center_horizontal"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+                <ImageButton
+                    android:layout_width="32sp"
+                    android:layout_height="32sp"
+                    android:background="#00000000"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/arrow_right"
+                    android:id="@+id/offsetSelectorUp"
+                    android:layout_gravity="center_vertical"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+50%"
+                    android:textSize="@dimen/textSize_scale_limits"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/offsetLimitMax"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:layout_width="75sp"
+            android:layout_height="wrap_content"
+            style="?android:attr/buttonStyleSmall"
+            android:id="@+id/startStopButton"
+            android:text="STOP"
+            android:layout_gravity="right"
             />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:layout_alignParentRight="true"
-        android:id="@+id/triggerSelector"
-        android:layout_centerVertical="true"
-        >
-        <ImageButton
-            android:layout_width="32sp"
-            android:layout_height="32sp"
-            android:background="#00000000"
-            android:scaleType="fitCenter"
-            android:src="@drawable/arrow_up"
-            android:id="@+id/triggerSelectorUp"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:text="0.5V"
-            />
-        <ImageButton
-            android:layout_width="32sp"
-            android:layout_height="32sp"
-            android:background="#00000000"
-            android:scaleType="fitCenter"
-            android:src="@drawable/arrow_down"
-            android:id="@+id/triggerSelectorDown"
-            />
-    </LinearLayout>
+</LinearLayout>
 
-    <tk.jalmas.tcc.visualisador.MySimpleGraph
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/graph"
-        android:layout_marginLeft="12sp"
-        android:layout_marginRight="12sp"
-        android:layout_marginBottom="24sp"
-        android:layout_toRightOf="@id/voltageScaleSelector"
-        android:layout_toLeftOf="@id/triggerSelector"
-        android:layout_above="@id/timeScaleSelector"
-        />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/buttonStyleSmall"
-        android:id="@+id/triggerButton"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:text="TRIG: OFF"
-        />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/buttonStyleSmall"
-        android:id="@+id/startStopButton"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:text="STOP"
-        />
-</RelativeLayout>
+
+
+
+
+
+
+
+
+
+

@@ -246,10 +246,11 @@ public class Receiver extends Thread {
                     }
 
                 if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_OK), SUB_ARRAY_OK)) {
-                    System.out.println("Detected end of message: " + bulkMsgLen);
+                    System.out.println("Detected end of message");
                     changeCurrentState(STATES.BULK_OUT);
+                    //buffIndex = decrementIndex(SUB_ARRAY_LENGTH_OK);
                     if (updater != null)
-                        updater.onUpdate(getSubArray(buffer, buffIndex, bulkMsgLen /*getMessageSize()*/));
+                        updater.onUpdate(getSubArray(buffer, buffIndex, bulkMsgLen));
                 }
 
                 break;

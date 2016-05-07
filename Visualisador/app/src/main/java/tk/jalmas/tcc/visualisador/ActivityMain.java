@@ -13,6 +13,8 @@ public class ActivityMain extends AppCompatActivity {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         getSupportActionBar().hide();
 
+
+
         setContentView(R.layout.activity_main);
 
         getFragmentManager().beginTransaction()
