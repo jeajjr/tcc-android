@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.util.Log;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,6 +16,8 @@ import java.util.UUID;
  * Created by jeajjr on 27/04/2016.
  */
 public class Receiver extends Thread {
+    private static final String TAG = Receiver.class.getName();
+
     public enum STATES {CONTINUOUS, BULK_IN, BULK_OUT};
     private STATES currentState;
 
@@ -48,7 +50,7 @@ public class Receiver extends Thread {
 
 
     private Updater updater;
-    private ErrorHandler errorHandler;
+    private StateListener stateListener;
     private OnSendingModeChangeListener modeChangeListener;
 
     BluetoothSocket btSocket;
@@ -84,8 +86,8 @@ public class Receiver extends Thread {
         this.updater = updater;
     }
 
-    public void setErrorHandler(ErrorHandler errorHandler) {
-        this.errorHandler = errorHandler;
+    public void setStateListener(StateListener stateListener) {
+        this.stateListener = stateListener;
     }
 
     public void setOnChangeSendingModeListener(OnSendingModeChangeListener modeChangeListener) {
@@ -97,6 +99,7 @@ public class Receiver extends Thread {
     }
 
     public void run() {
+        Log.d(TAG, "init thread");
         try {
             while (!initConnection()) {
                 Thread.sleep(1000);
@@ -108,8 +111,13 @@ public class Receiver extends Thread {
             dataIS = new DataInputStream(btSocket.getInputStream());
             dataOS = new DataOutputStream(btSocket.getOutputStream());
 
+            Log.d(TAG, "got I/O streams");
+
             while (true) {
                 buffer[buffIndex] = readCharacters();
+
+                if (stateListener != null)
+                    stateListener.onCharacterReceived();
 
                 checkBuffer();
 
@@ -119,8 +127,10 @@ public class Receiver extends Thread {
         catch (IOException e) {
             e.printStackTrace();
 
-            if (errorHandler != null)
-                errorHandler.onErrorOccurred();
+            if (stateListener != null) {
+                stateListener.onBluetoothStateChanged(false);
+                stateListener.onErrorOccurred();
+            }
         }
         catch (InterruptedException e) {
             System.out.println("sleep failed");
@@ -131,12 +141,18 @@ public class Receiver extends Thread {
     }
 
     private boolean initConnection() {
+        System.out.println("initConnection");
+
+        cleanup();
+
         try {
             BluetoothAdapter myBluetooth = BluetoothAdapter.getDefaultAdapter();
             if (myBluetooth == null) {
                 System.out.println("no bluetooth adapter found");
                 return false;
             }
+
+            Log.d(TAG, "got BT adapter");
 
             Set<BluetoothDevice> btDevices = myBluetooth.getBondedDevices();
             BluetoothDevice dispositivo = null;
@@ -154,9 +170,13 @@ public class Receiver extends Thread {
             if (dispositivo == null)
                 return false;
 
+            Log.d(TAG, "got BT device");
+
             btSocket = dispositivo.createInsecureRfcommSocketToServiceRecord(myUUID);
             BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
             btSocket.connect();
+
+            Log.d(TAG, "connected to socket");
 
             if (!btSocket.isConnected()) {
                 System.out.println("Bluetooth device not connected");
@@ -167,6 +187,9 @@ public class Receiver extends Thread {
             System.out.println("caught IOException: " + e.getMessage());
             return false;
         }
+
+        if (stateListener != null)
+            stateListener.onBluetoothStateChanged(true);
 
         return true;
     }
@@ -196,9 +219,6 @@ public class Receiver extends Thread {
         return decrementIndex(buffIndex, currentMessageStart);
     }
     private void checkBuffer(){
-        long start = System.nanoTime();
-        //System.out.println(String.format("checkBuffer: buffIndex(%d), currentMessageStart(%d)", buffIndex, currentMessageStart));
-
         switch (currentState) {
             case CONTINUOUS:
                 if (updater != null && (buffIndex%25 == 0))
@@ -248,7 +268,7 @@ public class Receiver extends Thread {
                 if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_OK), SUB_ARRAY_OK)) {
                     System.out.println("Detected end of message");
                     changeCurrentState(STATES.BULK_OUT);
-                    //buffIndex = decrementIndex(SUB_ARRAY_LENGTH_OK);
+                    buffIndex = decrementIndex(buffIndex, SUB_ARRAY_LENGTH_OK);
                     if (updater != null)
                         updater.onUpdate(getSubArray(buffer, buffIndex, bulkMsgLen));
                 }
@@ -275,9 +295,6 @@ public class Receiver extends Thread {
                 }
             }
         }
-
-        long end = System.nanoTime();
-        //System.out.println((end - start)/1000 + " us");
     }
 
     private void changeCurrentState(STATES newState) {
@@ -363,19 +380,28 @@ public class Receiver extends Thread {
     }
 
     public void cleanup() {
+        System.out.println("cleaning up BT connection");
         try {
+            System.out.println("closing IS");
             if (dataIS != null)
                 dataIS.close();
         }
         catch (IOException e1) {}
 
         try {
+            System.out.println("closing OS");
             if (dataOS != null)
                 dataOS.close();
         }
         catch (IOException e1) {}
 
         try {
+            Thread.sleep(500);
+        }
+        catch (InterruptedException e) {}
+
+        try {
+            System.out.println("closing socket");
             if (btSocket != null)
                 btSocket.close();
         }

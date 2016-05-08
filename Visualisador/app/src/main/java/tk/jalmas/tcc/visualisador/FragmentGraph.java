@@ -4,6 +4,7 @@ package tk.jalmas.tcc.visualisador;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,9 +23,15 @@ public class FragmentGraph extends Fragment {
     private MySimpleGraph graph;
     private Receiver receiver;
 
+    private ImageView bluetoothIcon;
+
+    private TextView triggerText;
     private TextView timeScaleText;
     private TextView holdOffText;
     private TextView timeOffsetText;
+    private TextView rxText;
+
+    private int rxTextCount;
 
     private boolean isGraphStopped;
 
@@ -42,6 +49,7 @@ public class FragmentGraph extends Fragment {
             refreshHandler.postDelayed(refresherRunnable, 2000);
         }
     };
+
     public FragmentGraph() {
         // Required empty public constructor
     }
@@ -52,12 +60,13 @@ public class FragmentGraph extends Fragment {
 
         MySimpleGraph.DataPoint[] points = new MySimpleGraph.DataPoint[data.length];
         for (int i = 0; i < data.length; i++)
-            points [i] = new MySimpleGraph.DataPoint((float) i, (float) data[i]);
+            points [i] = new MySimpleGraph.DataPoint((float) i,
+                    (float) (data[i] * Settings.deviceMaxVoltage / 256));
 
         if (lastPosition == -1)
-            graph.updateData(points);
+            graph.updateData(points, Settings.getTriggerValuePercent());
         else
-            graph.updateData(points, lastPosition);
+            graph.updateData(points, lastPosition, Settings.getTriggerValuePercent());
 
     }
 
@@ -68,15 +77,22 @@ public class FragmentGraph extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        Log.d(TAG, "onCreateView");
+
         View v = inflater.inflate(R.layout.fragment_graph, container, false);
 
         graph = (MySimpleGraph) v.findViewById(R.id.graph);
+        graph.setMaxYValue(Settings.voltageScaleMax);
 
+        bluetoothIcon = (ImageView) v.findViewById(R.id.bt_icon);
+
+        triggerText = (TextView) v.findViewById(R.id.triggerText);
         timeScaleText = (TextView) v.findViewById(R.id.timeScaleText);
         holdOffText = (TextView) v.findViewById(R.id.holdOffText);
         timeOffsetText = (TextView) v.findViewById(R.id.offsetText);
+        rxText = (TextView) v.findViewById(R.id.rxText);
 
+        updateTriggerText();
         updateTimeScaleText();
         updateHoldOffText();
         updateTimeOffsetText();
@@ -105,80 +121,121 @@ public class FragmentGraph extends Fragment {
         triggerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Settings.setIsTriggerEnabled(!Settings.isTriggerEnabled());
-                updateTriggerSettingsOnDevice();
+                if (!isGraphStopped) {
+                    Settings.setIsTriggerEnabled(!Settings.isTriggerEnabled());
+                    updateTriggerSettingsOnDevice();
 
-                if (Settings.isTriggerEnabled())
-                    triggerButton.setText("TRIG: ON");
-                else
-                    triggerButton.setText("TRIG: OFF");
+                    if (Settings.isTriggerEnabled())
+                        triggerButton.setText("TRIG: ON");
+                    else
+                        triggerButton.setText("TRIG: OFF");
+                }
+            }
+        });
+
+        v.findViewById(R.id.triggerSelectorDown).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isGraphStopped) {
+                    Settings.decreaseTriggerValue();
+                    updateTriggerSettingsOnDevice();
+                    updateTriggerText();
+                }
+            }
+        });
+
+        v.findViewById(R.id.triggerSelectorUp).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isGraphStopped) {
+                    Settings.increaseTriggerValue();
+                    updateTriggerSettingsOnDevice();
+                    updateTriggerText();
+                }
             }
         });
 
         v.findViewById(R.id.timeScaleSelectorDown).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings.decreaseTimeScale();
-                updateTimeScaleOnDevice();
-                updateTimeScaleText();
+                if (!isGraphStopped) {
+                    Settings.decreaseTimeScale();
+                    updateTimeScaleOnDevice();
+                    updateTimeScaleText();
+                }
             }
         });
 
         v.findViewById(R.id.timeScaleSelectorUp).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings.increaseTimeScale();
-                updateTimeScaleOnDevice();
-                updateTimeScaleText();
+                if (!isGraphStopped) {
+                    Settings.increaseTimeScale();
+                    updateTimeScaleOnDevice();
+                    updateTimeScaleText();
+                }
             }
         });
 
         v.findViewById(R.id.holdOffSelectorDown).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings.decreaseHoldOff();
-                updateHoldOffSettingOnDevice();
-                updateHoldOffText();
+                if (!isGraphStopped) {
+                    Settings.decreaseHoldOff();
+                    updateHoldOffSettingOnDevice();
+                    updateHoldOffText();
+                }
             }
         });
 
         v.findViewById(R.id.holdOffSelectorUp).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings.increaseHoldOff();
-                updateHoldOffSettingOnDevice();
-                updateHoldOffText();
+                if (!isGraphStopped) {
+                    Settings.increaseHoldOff();
+                    updateHoldOffSettingOnDevice();
+                    updateHoldOffText();
+                }
             }
         });
 
         v.findViewById(R.id.offsetSelectorDown).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings.decreaseTimeOffset();
-                updateTimeOffsetSettingOnDevice();
-                updateTimeOffsetText();
+                if (!isGraphStopped) {
+                    Settings.decreaseTimeOffset();
+                    updateTimeOffsetSettingOnDevice();
+                    updateTimeOffsetText();
+                }
             }
         });
 
         v.findViewById(R.id.offsetSelectorUp).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Settings.increaseTimeOffset();
-                updateTimeOffsetSettingOnDevice();
-                updateTimeOffsetText();
+                if (!isGraphStopped) {
+                    Settings.increaseTimeOffset();
+                    updateTimeOffsetSettingOnDevice();
+                    updateTimeOffsetText();
+                }
             }
         });
+
+        final ImageView pauseIcon = (ImageView) v.findViewById(R.id.pause_icon);
+        pauseIcon.setVisibility(View.INVISIBLE);
 
         final Button startStopButton = (Button) v.findViewById(R.id.startStopButton);
         startStopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isGraphStopped = !isGraphStopped;
-                if (isGraphStopped)
+                if (isGraphStopped) {
                     startStopButton.setText("START");
-                else
+                    pauseIcon.setVisibility(View.VISIBLE);
+                } else {
                     startStopButton.setText("STOP");
-
+                    pauseIcon.setVisibility(View.INVISIBLE);
+                }
             }
         });
     }
@@ -217,7 +274,41 @@ public class FragmentGraph extends Fragment {
             }
         });
 
-        receiver.setErrorHandler(new ErrorHandler() {
+        rxTextCount = 0;
+        rxText.setVisibility(View.INVISIBLE);
+        receiver.setStateListener(new StateListener() {
+
+            @Override
+            public void onCharacterReceived() {
+                rxTextCount++;
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (rxTextCount < 250)
+                            rxText.setVisibility(View.VISIBLE);
+                        else
+                            rxText.setVisibility(View.INVISIBLE);
+                    }
+                });
+
+                if (rxTextCount == 500)
+                    rxTextCount = 0;
+            }
+
+            @Override
+            public void onBluetoothStateChanged(final boolean connected) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (connected)
+                            bluetoothIcon.setImageResource(R.drawable.bluetooth);
+                        else
+                            bluetoothIcon.setImageResource(R.drawable.bluetooth_fade);
+                    }
+                });
+            }
+
             @Override
             public void onErrorOccurred() {
                 getActivity().runOnUiThread(new Runnable() {
@@ -251,6 +342,13 @@ public class FragmentGraph extends Fragment {
                 });
             }
         });
+    }
+
+    private void updateTriggerText() {
+        int triggerPercent = Settings.getTriggerValuePercent();
+
+        triggerText.setText(String.format("%.1fV", (float) (((double) triggerPercent) * 4.0 / 100.0)));
+
     }
 
     private void updateTimeScaleText() {
@@ -296,9 +394,10 @@ public class FragmentGraph extends Fragment {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-
-        if (receiver != null)
+        if (receiver != null) {
             receiver.cleanup();
+        }
+
+        super.onDestroy();
     }
 }

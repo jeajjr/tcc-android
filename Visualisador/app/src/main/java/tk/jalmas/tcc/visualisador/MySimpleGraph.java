@@ -14,6 +14,9 @@ public class MySimpleGraph extends View {
     private int lastPosition;
     private final int OFFSET = 50;
 
+    private char triggerLevelPercent;
+    private float maxYValue;
+
     private Paint axisPaint;
     private Paint gridPaint;
     private Paint pointPaint;
@@ -23,7 +26,7 @@ public class MySimpleGraph extends View {
 
     private final int GRID_STROKE = 1;
     private final int GRID_X_COUNT = 10;
-    private final int GRID_Y_COUNT = 5;
+    private final int GRID_Y_COUNT = 8;
 
     private final int POINT_RADIUS = 4;
     private final int POINT_STROKE = 2;
@@ -31,6 +34,8 @@ public class MySimpleGraph extends View {
     public void init() {
         isLastPositionEnabled = false;
         lastPosition = 0;
+
+        triggerLevelPercent = 0;
 
         axisPaint = new Paint(Color.BLACK);
         axisPaint.setStrokeWidth(AXIS_STROKE);
@@ -42,6 +47,8 @@ public class MySimpleGraph extends View {
         pointPaint.setStrokeWidth(POINT_STROKE);
 
         this.setBackgroundColor(Color.WHITE);
+
+        maxYValue = 0;
     }
     public MySimpleGraph(Context context) {
         super(context);
@@ -92,22 +99,28 @@ public class MySimpleGraph extends View {
                     width - AXIS_OFFSET, height * i / GRID_Y_COUNT,
                     gridPaint);
 
+        // Draw trigger line
+        int triggerY = (int) (height * triggerLevelPercent / 100.0);
+        for (int i=0; i<=width; i+=40)
+            canvas.drawLine(
+                    i, height - triggerY,
+                    i + 20, height - triggerY,
+                    axisPaint);
+
         // Draw points
         if (data != null) {
             float minX = data[0].x;
             float maxX = data[data.length - 1].x;
             float deltaX = (maxX - minX);
 
-            float factorY = (float) height / 256;
+            float factorY = (float) height / this.maxYValue;
 
             int lastX = 0;
             int lastY = 0;
 
             for (int i = 0; i < data.length; i++) {
                 int newX = (int) ((data[i].x - minX) * width / deltaX);
-                int newY = (int) ((256 - data[i].y) * factorY);
-                //canvas.drawCircle(newX, newY, POINT_RADIUS, pointPaint);
-                //System.out.printf("(%f, %f) -> (%d, %d)\n", data[i].x, data[i].y, newX, newY);
+                int newY = (int) ((this.maxYValue - data[i].y) * factorY);
 
                 if (!isLastPositionEnabled || i < lastPosition || (lastPosition + OFFSET) < i)
                     if (i != 0)
@@ -119,18 +132,25 @@ public class MySimpleGraph extends View {
         }
     }
 
-    public void updateData(DataPoint[] data) {
-        this.data = data;
-        isLastPositionEnabled = false;
-
-        this.invalidate();
+    public void setMaxYValue(float maxYValue) {
+        this.maxYValue = maxYValue;
     }
 
-    public void updateData(DataPoint[] data, int lastPosition) {
-        this.data = data;
-        isLastPositionEnabled = true;
-        this.lastPosition = lastPosition;
+    public void updateData(DataPoint[] data, char triggerLevelPercent) {
+        updateData(data, -1, triggerLevelPercent);
+    }
 
+    public void updateData(DataPoint[] data, int lastPosition, char triggerLevelPercent) {
+        this.data = data;
+
+        if (lastPosition != -1) {
+            isLastPositionEnabled = true;
+            this.lastPosition = lastPosition;
+        }
+        else
+            isLastPositionEnabled = false;
+
+        this.triggerLevelPercent = triggerLevelPercent;
         this.invalidate();
     }
 

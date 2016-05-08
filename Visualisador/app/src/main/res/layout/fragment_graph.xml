@@ -25,31 +25,50 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:gravity="center_vertical"
+            android:gravity="center_horizontal"
             android:id="@+id/triggerSelector"
+
             >
-            <ImageButton
-                android:layout_width="32sp"
-                android:layout_height="32sp"
-                android:background="#00000000"
-                android:scaleType="fitCenter"
-                android:src="@drawable/arrow_up"
-                android:id="@+id/triggerSelectorUp"
-                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:gravity="center"
+                >
+                <ImageButton
+                    android:layout_width="32sp"
+                    android:layout_height="32sp"
+                    android:background="#00000000"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/arrow_up"
+                    android:id="@+id/triggerSelectorUp"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text="0.5V"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/triggerText"
+                    />
+                <ImageButton
+                    android:layout_width="32sp"
+                    android:layout_height="32sp"
+                    android:background="#00000000"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/arrow_down"
+                    android:id="@+id/triggerSelectorDown"
+                    />
+            </LinearLayout>
             <TextView
+                android:layout_marginBottom="10sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
-                android:text="0.5V"
-                android:layout_gravity="center_horizontal"
-                />
-            <ImageButton
-                android:layout_width="32sp"
-                android:layout_height="32sp"
-                android:background="#00000000"
-                android:scaleType="fitCenter"
-                android:src="@drawable/arrow_down"
-                android:id="@+id/triggerSelectorDown"
+                android:text="0.5V/div"
+                android:layout_gravity="bottom|end"
+
                 />
         </LinearLayout>
 
@@ -67,14 +86,42 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical"
+            android:gravity="center_horizontal"
             >
             <ImageView
                 android:layout_width="32sp"
                 android:layout_height="32sp"
                 android:background="#00000000"
                 android:scaleType="fitCenter"
+                android:src="@drawable/bluetooth_disabled"
+                android:id="@+id/bt_icon"
+                />
+            <ImageView
+                android:layout_marginTop="12sp"
+                android:layout_width="32sp"
+                android:layout_height="32sp"
+                android:background="#00000000"
+                android:scaleType="fitCenter"
+                android:src="@drawable/pause"
+                android:id="@+id/pause_icon"
+                />
+            <ImageView
+                android:layout_marginTop="12sp"
+                android:layout_width="32sp"
+                android:layout_height="32sp"
+                android:background="#00000000"
+                android:scaleType="fitCenter"
                 android:src="@drawable/trigger_rise_faded"
                 android:id="@+id/trigger_status"
+                />
+            <TextView
+                android:layout_marginTop="12sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="RX"
+                android:textColor="#000000"
+                android:id="@+id/rxText"
                 />
         </LinearLayout>
     </LinearLayout>

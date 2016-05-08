@@ -24,11 +24,13 @@ public class Settings {
     private static final char TRIGGER_LEVEL_OFF = 0b00011111;
 
     private static boolean isTriggerEnabled = false;
-    private static char currentTriggerValue = (TRIGGER_LEVEL_0 + TRIGGER_LEVEL_100)/2;
+    private static char currentTriggerValuePercent = 50;
+
+    private static char TRIGGER_STEP_PERCENT = 5;
 
     public static char composeTriggerCommand() {
         if (isTriggerEnabled)
-            return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TRIGGER_LEVEL) | (MASK_COMMAND_VALUE & currentTriggerValue)) & 0xFF);
+            return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TRIGGER_LEVEL) | (MASK_COMMAND_VALUE & getTriggerValue())) & 0xFF);
         else
             return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TRIGGER_LEVEL) | (MASK_COMMAND_VALUE & TRIGGER_LEVEL_OFF)) & 0xFF);
     }
@@ -41,8 +43,25 @@ public class Settings {
         return Settings.isTriggerEnabled;
     }
 
-    public static void setTriggerValue (int percentage) {
-        Settings.currentTriggerValue = (char) (TRIGGER_LEVEL_100 * percentage /100);
+    public static char getTriggerValuePercent() {
+        return currentTriggerValuePercent;
+    }
+
+    private static char getTriggerValue() {
+        if ((currentTriggerValuePercent * voltageScaleMax / 100f) > deviceMaxVoltage)
+            return TRIGGER_LEVEL_OFF;
+
+        return (char) (TRIGGER_LEVEL_100 * currentTriggerValuePercent * voltageScaleMax / (100f * deviceMaxVoltage));
+    }
+
+    public static void increaseTriggerValue() {
+        if (currentTriggerValuePercent + TRIGGER_STEP_PERCENT <= 100)
+            currentTriggerValuePercent += TRIGGER_STEP_PERCENT;
+    }
+
+    public static void decreaseTriggerValue() {
+        if (currentTriggerValuePercent - TRIGGER_STEP_PERCENT >= 0)
+            currentTriggerValuePercent -= TRIGGER_STEP_PERCENT;
     }
 
 
@@ -59,7 +78,6 @@ public class Settings {
     private static final String[] HOLD_OFF_LABELS = {"n/a", "1/8", "2/8", "3/8", "4/8", "5/8", "6/8", "7/8"};
 
     public static char composeHoldOffCommand() {
-        System.out.println("composeHoldOffCommand " + HOLD_OFF_LABELS[currentHoldOff]);
         return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_HOLD_OFF) | (MASK_COMMAND_VALUE & currentHoldOff)) & 0xFF);
     }
 
@@ -103,14 +121,13 @@ public class Settings {
     private static final char TIME_SCALE_200MS = 0b00001010;
     private static final char TIME_SCALE_500MS = 0b00001011;
     private static final char TIME_SCALE_1S = 0b00001100;
-    private static final String[] TIME_SCALE_LABELS = {"10us", "50us", "100us", "200us", "500us",
-            "1ms", "5ms", "10ms", "50ms", "100ms", "200ms", "500ms", "1s"};
+    private static final String[] TIME_SCALE_LABELS = {"1us", "5us", "10us", "20us", "50us",
+            "100us", "500us", "1ms", "5ms", "10ms", "20ms", "50ms", "100ms"};
 
     private static char currentTimeScale = TIME_SCALE_500MS;
 
 
     public static char composeTimeScaleCommand() {
-        System.out.println("composeTimeScaleCommand " + TIME_SCALE_LABELS[currentTimeScale]);
         return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TIME_SCALE) | (MASK_COMMAND_VALUE & currentTimeScale)) & 0xFF);
     }
 
@@ -151,7 +168,6 @@ public class Settings {
             "+10%", "+20%", "+30%", "+40%", "+50%"};
 
     public static char composeTimeOffsetCommand() {
-        System.out.println("composeTimeOffsetCommand " + TIME_OFFSET_LABELS[currentTimeOffset]);
         return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TIME_OFFSET) | (MASK_COMMAND_VALUE & currentTimeOffset)) & 0xFF);
     }
 
@@ -176,6 +192,13 @@ public class Settings {
     public static String getMaxTimeOffsetLabel() {
         return TIME_OFFSET_LABELS[TIME_OFFSET_MAX];
     }
+
+    /**************************************************
+     *                  VOLTAGE SCALE
+     *************************************************/
+    public static final float voltageScaleMax = 4.0f;
+
+    public static final float deviceMaxVoltage = 3.0f;
 
 
     /*********************************
