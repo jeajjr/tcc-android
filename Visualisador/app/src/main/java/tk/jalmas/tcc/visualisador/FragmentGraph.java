@@ -113,6 +113,7 @@ public class FragmentGraph extends Fragment {
         refreshHandler = new Handler();
         refresherRunnable.run();
 
+        int i = 1;
         receiver.start();
 
         return v;

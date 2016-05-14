@@ -218,18 +218,17 @@ public class Receiver extends Thread {
     private int getBulkMessageCurrentIndex() {
         return decrementIndex(buffIndex, currentMessageStart);
     }
+
     private void checkBuffer(){
         switch (currentState) {
             case CONTINUOUS:
-                if (updater != null && (buffIndex%25 == 0))
+                if (updater != null && (buffIndex%25/*25*/ == 0))
                     updater.onUpdate(
                             getSubArray(
                                     buffer,
                                     (buffIndex/Settings.getCurrentBlockSize()) * Settings.getCurrentBlockSize() + Settings.getCurrentBlockSize(),
                                     Settings.getCurrentBlockSize()),
                             buffIndex % Settings.getCurrentBlockSize());
-                //buffer, buffIndex);
-                //getSubArray(buffer, decrementIndex(buffIndex, CONTINUOUS_MODE_PRINT_OFFSET), Settings.getCurrentBlockSize()));
 
                 if (buffIndex % Settings.getCurrentBlockSize() == Settings.getCurrentBlockSize() - 1)
                     for (int i=0; i <Settings.getCurrentBlockSize(); i++) {
@@ -279,7 +278,6 @@ public class Receiver extends Thread {
                 if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_USP_BK), SUB_ARRAY_USP_BK)) {
                     System.out.println("Detected start of message");
                     changeCurrentState(STATES.BULK_IN);
-
                 }
                 break;
         }

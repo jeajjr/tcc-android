@@ -141,14 +141,13 @@ public class Settings {
     private static final char TIME_SCALE_500MS =    0b00001110;
     private static final char TIME_SCALE_1S =       0b00001111;
     private static final char TIME_SCALE_2S =       0b00010000;
-    private static final char TIME_SCALE_5S =       0b00010001;
 
     private static final String[] TIME_SCALE_LABELS =
         {"1us", "2us", "5us", "10us", "20us", "50us", "100us", "200us", "500us", "1ms",
-                "2ms", "5ms", "10ms", "20ms", "50ms", "100ms", "200ms", "500ms"};
+                "2ms", "5ms", "10ms", "20ms", "50ms", "100ms", "200ms"};
 
     private static final int[] CONTINUOUS_MODE_BLOCK_SIZE =
-        {1, 1, 1, 1, 6, 15, 30, 50, 150, 250, 500, 500, 500, 500, 500, 500, 500, 500};
+        {1, 1, 1, 1, 2, 5, 10, 20, 50, 100, 200, 500, 500, 500, 500, 500, 500};
 
     private static char currentTimeScale = TIME_SCALE_500MS;
 
@@ -166,7 +165,7 @@ public class Settings {
     }
 
     public static void increaseTimeScale() {
-        if (currentTimeScale != TIME_SCALE_5S)
+        if (currentTimeScale != TIME_SCALE_2S)
             currentTimeScale++;
     }
 
@@ -180,7 +179,7 @@ public class Settings {
     }
 
     public static String getMaxTimeScaleLabel() {
-        return TIME_SCALE_LABELS[TIME_SCALE_5S];
+        return TIME_SCALE_LABELS[TIME_SCALE_2S];
     }
 
 
@@ -228,7 +227,7 @@ public class Settings {
      *************************************************/
     public static final float voltageScaleMax = 4.0f;
 
-    public static final float deviceMaxVoltage = 3.0f;
+    public static final float deviceMaxVoltage = 3.3f;
 
 
     /*********************************
