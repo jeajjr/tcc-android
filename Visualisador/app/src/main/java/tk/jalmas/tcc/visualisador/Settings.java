@@ -8,39 +8,55 @@ public class Settings {
      * Phone -> uC communication
      *********************************/
 
-    private static final char MASK_COMMAND = 0b10000000;
-    private static final char MASK_SUB_COMMAND = 0b01100000;
+    private static final char MASK_COMMAND =       0b11100000;
     private static final char MASK_COMMAND_VALUE = 0b00011111;
-
-    private static final char COMMAND = 0b10000000;
 
     /**************************************************
      *                  TRIGGER LEVEL
      *************************************************/
-    private static final char SET_TRIGGER_LEVEL = 0b00000000;
+    private static final char SET_TRIGGER_OFF =  0b10000000;
+    private static final char SET_TRIGGER_RISE = 0b10100000;
+    private static final char SET_TRIGGER_FALL = 0b11000000;
 
-    private static final char TRIGGER_LEVEL_0 = 0b00000000;
-    private static final char TRIGGER_LEVEL_100 = 0b00011110;
-    private static final char TRIGGER_LEVEL_OFF = 0b00011111;
+    private static final char TRIGGER_LEVEL_0 =   0b00000000;
+    private static final char TRIGGER_LEVEL_100 = 0b00011111;
 
-    private static boolean isTriggerEnabled = false;
+    public enum TRIGGER_STATES {OFF, RISE, FALL}
+    private static TRIGGER_STATES currentTriggerState = TRIGGER_STATES.OFF;
+
     private static char currentTriggerValuePercent = 50;
 
     private static char TRIGGER_STEP_PERCENT = 5;
 
     public static char composeTriggerCommand() {
-        if (isTriggerEnabled)
-            return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TRIGGER_LEVEL) | (MASK_COMMAND_VALUE & getTriggerValue())) & 0xFF);
-        else
-            return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TRIGGER_LEVEL) | (MASK_COMMAND_VALUE & TRIGGER_LEVEL_OFF)) & 0xFF);
+        switch (currentTriggerState) {
+            case OFF:
+                return (char) ((MASK_COMMAND & SET_TRIGGER_OFF) & 0xFF);
+            case RISE:
+                return (char) (((MASK_COMMAND & SET_TRIGGER_RISE) | (MASK_COMMAND_VALUE & getTriggerValue())) & 0xFF);
+            case FALL:
+                return (char) (((MASK_COMMAND & SET_TRIGGER_FALL) | (MASK_COMMAND_VALUE & getTriggerValue())) & 0xFF);
+            default:
+                return 0;
+        }
     }
 
-    public static void setIsTriggerEnabled (boolean isTriggerEnabled) {
-        Settings.isTriggerEnabled = isTriggerEnabled;
+    public static void toggleTriggerState() {
+        switch (currentTriggerState) {
+            case OFF:
+                Settings.currentTriggerState = TRIGGER_STATES.RISE;
+                break;
+            case RISE:
+                Settings.currentTriggerState = TRIGGER_STATES.FALL;
+                break;
+            case FALL:
+                Settings.currentTriggerState = TRIGGER_STATES.OFF;
+                break;
+        }
     }
 
-    public static boolean isTriggerEnabled() {
-        return Settings.isTriggerEnabled;
+    public static TRIGGER_STATES getTriggerState() {
+        return Settings.currentTriggerState;
     }
 
     public static char getTriggerValuePercent() {
@@ -49,7 +65,7 @@ public class Settings {
 
     private static char getTriggerValue() {
         if ((currentTriggerValuePercent * voltageScaleMax / 100f) > deviceMaxVoltage)
-            return TRIGGER_LEVEL_OFF;
+            return TRIGGER_LEVEL_0;
 
         return (char) (TRIGGER_LEVEL_100 * currentTriggerValuePercent * voltageScaleMax / (100f * deviceMaxVoltage));
     }
@@ -78,7 +94,7 @@ public class Settings {
     private static final String[] HOLD_OFF_LABELS = {"n/a", "1/8", "2/8", "3/8", "4/8", "5/8", "6/8", "7/8"};
 
     public static char composeHoldOffCommand() {
-        return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_HOLD_OFF) | (MASK_COMMAND_VALUE & currentHoldOff)) & 0xFF);
+        return (char) (((MASK_COMMAND & SET_HOLD_OFF) | (MASK_COMMAND_VALUE & currentHoldOff)) & 0xFF);
     }
 
     public static String getCurrentHoldOffLabel() {
@@ -108,27 +124,41 @@ public class Settings {
      *************************************************/
     private static final char SET_TIME_SCALE = 0b01000000;
 
-    private static final char TIME_SCALE_10US = 0b00000000;
-    private static final char TIME_SCALE_50US = 0b00000001;
-    private static final char TIME_SCALE_100US = 0b00000010;
-    private static final char TIME_SCALE_200US = 0b00000011;
-    private static final char TIME_SCALE_500US = 0b00000100;
-    private static final char TIME_SCALE_1MS = 0b00000101;
-    private static final char TIME_SCALE_5MS = 0b00000110;
-    private static final char TIME_SCALE_10MS = 0b00000111;
-    private static final char TIME_SCALE_50MS = 0b00001000;
-    private static final char TIME_SCALE_100MS = 0b00001001;
-    private static final char TIME_SCALE_200MS = 0b00001010;
-    private static final char TIME_SCALE_500MS = 0b00001011;
-    private static final char TIME_SCALE_1S = 0b00001100;
-    private static final String[] TIME_SCALE_LABELS = {"1us", "5us", "10us", "20us", "50us",
-            "100us", "500us", "1ms", "5ms", "10ms", "20ms", "50ms", "100ms"};
+    private static final char TIME_SCALE_10US =     0b00000000;
+    private static final char TIME_SCALE_20US =     0b00000001;
+    private static final char TIME_SCALE_50US =     0b00000010;
+    private static final char TIME_SCALE_100US =    0b00000011;
+    private static final char TIME_SCALE_200US =    0b00000100;
+    private static final char TIME_SCALE_500US =    0b00000101;
+    private static final char TIME_SCALE_1MS =      0b00000110;
+    private static final char TIME_SCALE_2MS =      0b00000111;
+    private static final char TIME_SCALE_5MS =      0b00001000;
+    private static final char TIME_SCALE_10MS =     0b00001001;
+    private static final char TIME_SCALE_20MS =     0b00001010;
+    private static final char TIME_SCALE_50MS =     0b00001011;
+    private static final char TIME_SCALE_100MS =    0b00001100;
+    private static final char TIME_SCALE_200MS =    0b00001101;
+    private static final char TIME_SCALE_500MS =    0b00001110;
+    private static final char TIME_SCALE_1S =       0b00001111;
+    private static final char TIME_SCALE_2S =       0b00010000;
+    private static final char TIME_SCALE_5S =       0b00010001;
+
+    private static final String[] TIME_SCALE_LABELS =
+        {"1us", "2us", "5us", "10us", "20us", "50us", "100us", "200us", "500us", "1ms",
+                "2ms", "5ms", "10ms", "20ms", "50ms", "100ms", "200ms", "500ms"};
+
+    private static final int[] CONTINUOUS_MODE_BLOCK_SIZE =
+        {1, 1, 1, 1, 6, 15, 30, 50, 150, 250, 500, 500, 500, 500, 500, 500, 500, 500};
 
     private static char currentTimeScale = TIME_SCALE_500MS;
 
 
+    public static int getCurrentBlockSize() {
+        return CONTINUOUS_MODE_BLOCK_SIZE[currentTimeScale];
+    }
+
     public static char composeTimeScaleCommand() {
-        return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TIME_SCALE) | (MASK_COMMAND_VALUE & currentTimeScale)) & 0xFF);
+        return (char) (((MASK_COMMAND & SET_TIME_SCALE) | (MASK_COMMAND_VALUE & currentTimeScale)) & 0xFF);
     }
 
     public static String getCurrentTimeScaleLabel() {
@@ -136,7 +166,7 @@ public class Settings {
     }
 
     public static void increaseTimeScale() {
-        if (currentTimeScale != TIME_SCALE_1S)
+        if (currentTimeScale != TIME_SCALE_5S)
             currentTimeScale++;
     }
 
@@ -150,7 +180,7 @@ public class Settings {
     }
 
     public static String getMaxTimeScaleLabel() {
-        return TIME_SCALE_LABELS[TIME_SCALE_1S];
+        return TIME_SCALE_LABELS[TIME_SCALE_5S];
     }
 
 
@@ -168,7 +198,7 @@ public class Settings {
             "+10%", "+20%", "+30%", "+40%", "+50%"};
 
     public static char composeTimeOffsetCommand() {
-        return (char) (((MASK_COMMAND & COMMAND) | (MASK_SUB_COMMAND & SET_TIME_OFFSET) | (MASK_COMMAND_VALUE & currentTimeOffset)) & 0xFF);
+        return (char) (((MASK_COMMAND & SET_TIME_OFFSET) | (MASK_COMMAND_VALUE & currentTimeOffset)) & 0xFF);
     }
 
     public static String getCurrentTimeOffsetLabel() {

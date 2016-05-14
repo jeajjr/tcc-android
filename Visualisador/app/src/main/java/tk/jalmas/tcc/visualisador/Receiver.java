@@ -32,8 +32,8 @@ public class Receiver extends Thread {
     private int buffIndex;
     private int currentMessageStart;
 
-    private final int BUFFER_SIZE = 512 * 4;
-    private final int CONTINUOUS_BLOCK_SIZE = 512;
+    private final int BUFFER_SIZE = 500 * 4;
+    private final int CONTINUOUS_BLOCK_SIZE = 1000;
 
     // index where the first byte of the message length is
     private final int LENGTH_START_INDEX =  3;
@@ -225,16 +225,16 @@ public class Receiver extends Thread {
                     updater.onUpdate(
                             getSubArray(
                                     buffer,
-                                    (buffIndex/CONTINUOUS_BLOCK_SIZE) * CONTINUOUS_BLOCK_SIZE + CONTINUOUS_BLOCK_SIZE,
-                                    CONTINUOUS_BLOCK_SIZE),
-                            buffIndex % CONTINUOUS_BLOCK_SIZE);
+                                    (buffIndex/Settings.getCurrentBlockSize()) * Settings.getCurrentBlockSize() + Settings.getCurrentBlockSize(),
+                                    Settings.getCurrentBlockSize()),
+                            buffIndex % Settings.getCurrentBlockSize());
                 //buffer, buffIndex);
-                //getSubArray(buffer, decrementIndex(buffIndex, CONTINUOUS_MODE_PRINT_OFFSET), CONTINUOUS_BLOCK_SIZE));
+                //getSubArray(buffer, decrementIndex(buffIndex, CONTINUOUS_MODE_PRINT_OFFSET), Settings.getCurrentBlockSize()));
 
-                if (buffIndex % CONTINUOUS_BLOCK_SIZE == CONTINUOUS_BLOCK_SIZE - 1)
-                    for (int i=0; i <CONTINUOUS_BLOCK_SIZE; i++) {
+                if (buffIndex % Settings.getCurrentBlockSize() == Settings.getCurrentBlockSize() - 1)
+                    for (int i=0; i <Settings.getCurrentBlockSize(); i++) {
                         int destinationIndex = incrementIndex(buffIndex, i + 1);
-                        buffer[destinationIndex] = buffer[decrementIndex(destinationIndex, CONTINUOUS_BLOCK_SIZE)];
+                        buffer[destinationIndex] = buffer[decrementIndex(destinationIndex, Settings.getCurrentBlockSize())];
                     }
                 // Detect command to change to continuous mode and erase it from buffer
                 if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_USP_OK), SUB_ARRAY_USP_OK)) {

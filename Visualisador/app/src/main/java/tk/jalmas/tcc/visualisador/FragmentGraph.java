@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Set;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -122,13 +124,20 @@ public class FragmentGraph extends Fragment {
             @Override
             public void onClick(View view) {
                 if (!isGraphStopped) {
-                    Settings.setIsTriggerEnabled(!Settings.isTriggerEnabled());
+                    Settings.toggleTriggerState();
                     updateTriggerSettingsOnDevice();
 
-                    if (Settings.isTriggerEnabled())
-                        triggerButton.setText("TRIG: ON");
-                    else
-                        triggerButton.setText("TRIG: OFF");
+                    switch (Settings.getTriggerState()) {
+                        case OFF:
+                            triggerButton.setText("TRIG: OFF");
+                            break;
+                        case RISE:
+                            triggerButton.setText("TRIG: RISE");
+                            break;
+                        case FALL:
+                            triggerButton.setText("TRIG: FALL");
+                            break;
+                    }
                 }
             }
         });
