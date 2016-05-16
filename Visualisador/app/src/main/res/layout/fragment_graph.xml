@@ -1,4 +1,4 @@
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,16 +8,15 @@
     android:paddingLeft="10sp"
     android:paddingRight="10sp"
     android:paddingTop="10sp"
-    android:orientation="vertical"
     >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="360sp"
         android:orientation="horizontal"
-        android:layout_weight="1"
         android:padding="0dp"
         android:layout_margin="0dp"
+        android:layout_alignParentTop="true"
         >
 
         <!-- TRIGGER LEVEL SELECTOR -->
@@ -82,6 +81,7 @@
             android:layout_weight="1"
             />
 
+        <!-- Side indicators -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -126,10 +126,11 @@
         </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:id="@+id/bottomPanel"
         >
         <Button
             android:layout_width="70sp"
@@ -137,250 +138,9 @@
             style="?android:attr/buttonStyleSmall"
             android:id="@+id/triggerButton"
             android:text="TRIG: OFF"
-            android:layout_gravity="center"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
             />
-        <!-- HOLD OFF SELECTOR -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-            android:id="@+id/holdOffSelector"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical"
-            >
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                >
-                <ImageButton
-                    android:layout_width="32sp"
-                    android:layout_height="32sp"
-                    android:background="#00000000"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/arrow_left"
-                    android:id="@+id/holdOffSelectorDown"
-                    android:layout_gravity="center_vertical"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="-1"
-                    android:textSize="@dimen/textSize_scale_limits"
-                    android:layout_gravity="center_horizontal"
-                    android:id="@+id/holdOffLimitMin"
-                    />
-                </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                >
-                <TextView
-                    android:layout_width="80sp"
-                    android:layout_height="wrap_content"
-                    android:textSize="24sp"
-                    android:text="+3/4"
-                    android:id="@+id/holdOffText"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="HOLD OFF"
-                    android:textSize="@dimen/textSize_scale_name"
-                    android:layout_gravity="center_horizontal"
-                    />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
-                <ImageButton
-                    android:layout_width="32sp"
-                    android:layout_height="32sp"
-                    android:background="#00000000"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/arrow_right"
-                    android:id="@+id/holdOffSelectorUp"
-                    android:layout_gravity="center_vertical"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="+1"
-                    android:textSize="@dimen/textSize_scale_limits"
-                    android:layout_gravity="center_horizontal"
-                    android:id="@+id/holdOffLimitMax"
-                    />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- TIME SCALE SELECTOR -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-            android:id="@+id/timeScaleSelector"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical"
-            >
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
-                <ImageButton
-                    android:layout_width="32sp"
-                    android:layout_height="32sp"
-                    android:background="#00000000"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/arrow_left"
-                    android:id="@+id/timeScaleSelectorDown"
-                    android:layout_gravity="center_vertical"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1ms"
-                    android:textSize="@dimen/textSize_scale_limits"
-                    android:layout_gravity="center_horizontal"
-                    android:id="@+id/timeScaleLimitMin"
-                    />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                >
-                <TextView
-                    android:layout_width="80sp"
-                    android:layout_height="wrap_content"
-                    android:textSize="24sp"
-                    android:text="500ms"
-                    android:id="@+id/timeScaleText"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TIME SCALE"
-                    android:textSize="@dimen/textSize_scale_name"
-                    android:layout_gravity="center_horizontal"
-                    />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
-                <ImageButton
-                    android:layout_width="32sp"
-                    android:layout_height="32sp"
-                    android:background="#00000000"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/arrow_right"
-                    android:id="@+id/timeScaleSelectorUp"
-                    android:layout_gravity="center_vertical"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5s"
-                    android:textSize="@dimen/textSize_scale_limits"
-                    android:layout_gravity="center_horizontal"
-                    android:id="@+id/timeScaleLimitMax"
-                    />
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- OFFSET SELECTOR -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-            android:id="@+id/offsetSelector"
-            android:layout_weight="1"
-            android:layout_gravity="center_vertical"
-            >
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                >
-                <ImageButton
-                    android:layout_width="32sp"
-                    android:layout_height="32sp"
-                    android:background="#00000000"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/arrow_left"
-                    android:id="@+id/offsetSelectorDown"
-                    android:layout_gravity="center_vertical"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="-50%"
-                    android:textSize="@dimen/textSize_scale_limits"
-                    android:layout_gravity="center_horizontal"
-                    android:id="@+id/offsetLimitMin"
-                    />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                >
-                <TextView
-                    android:layout_width="80sp"
-                    android:layout_height="wrap_content"
-                    android:textSize="24sp"
-                    android:text="+20%"
-                    android:id="@+id/offsetText"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="OFFSET"
-                    android:textSize="@dimen/textSize_scale_name"
-                    android:layout_gravity="center_horizontal"
-                    />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
-                <ImageButton
-                    android:layout_width="32sp"
-                    android:layout_height="32sp"
-                    android:background="#00000000"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/arrow_right"
-                    android:id="@+id/offsetSelectorUp"
-                    android:layout_gravity="center_vertical"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="+50%"
-                    android:textSize="@dimen/textSize_scale_limits"
-                    android:layout_gravity="center_horizontal"
-                    android:id="@+id/offsetLimitMax"
-                    />
-            </LinearLayout>
-        </LinearLayout>
-
         <Button
             android:layout_width="75sp"
             android:layout_height="wrap_content"
@@ -388,10 +148,320 @@
             android:id="@+id/startStopButton"
             android:text="STOP"
             android:layout_gravity="right"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
             />
-    </LinearLayout>
+        <!-- selectors panel -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/selectorsPanel"
+            android:visibility="visible"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@id/triggerButton"
+            android:layout_toLeftOf="@id/startStopButton"
+            >
+                <!-- HOLD OFF SELECTOR -->
+                <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal"
+                    android:id="@+id/holdOffSelector"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    >
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        >
+                        <ImageButton
+                            android:layout_width="32sp"
+                            android:layout_height="32sp"
+                            android:background="#00000000"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/arrow_left"
+                            android:id="@+id/holdOffSelectorDown"
+                            android:layout_gravity="center_vertical"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-1"
+                            android:textSize="@dimen/textSize_scale_limits"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/holdOffLimitMin"
+                            />
+                        </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        >
+                        <TextView
+                            android:layout_width="80sp"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            android:text="+3/4"
+                            android:id="@+id/holdOffText"
+                            android:layout_gravity="center_vertical"
+                            android:gravity="center"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="HOLD OFF"
+                            android:textSize="@dimen/textSize_scale_name"
+                            android:layout_gravity="center_horizontal"
+                            />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        >
+                        <ImageButton
+                            android:layout_width="32sp"
+                            android:layout_height="32sp"
+                            android:background="#00000000"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/arrow_right"
+                            android:id="@+id/holdOffSelectorUp"
+                            android:layout_gravity="center_vertical"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+1"
+                            android:textSize="@dimen/textSize_scale_limits"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/holdOffLimitMax"
+                            />
+                    </LinearLayout>
+                </LinearLayout>
 
-</LinearLayout>
+                <!-- TIME SCALE SELECTOR -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal"
+                    android:id="@+id/timeScaleSelector"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    >
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        >
+                        <ImageButton
+                            android:layout_width="32sp"
+                            android:layout_height="32sp"
+                            android:background="#00000000"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/arrow_left"
+                            android:id="@+id/timeScaleSelectorDown"
+                            android:layout_gravity="center_vertical"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1ms"
+                            android:textSize="@dimen/textSize_scale_limits"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/timeScaleLimitMin"
+                            />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        >
+                        <TextView
+                            android:layout_width="100sp"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            android:text="500.0ms"
+                            android:id="@+id/timeScaleText"
+                            android:layout_gravity="center_vertical"
+                            android:gravity="center"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TIME SCALE"
+                            android:textSize="@dimen/textSize_scale_name"
+                            android:layout_gravity="center_horizontal"
+                            />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        >
+                        <ImageButton
+                            android:layout_width="32sp"
+                            android:layout_height="32sp"
+                            android:background="#00000000"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/arrow_right"
+                            android:id="@+id/timeScaleSelectorUp"
+                            android:layout_gravity="center_vertical"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="5s"
+                            android:textSize="@dimen/textSize_scale_limits"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/timeScaleLimitMax"
+                            />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- OFFSET SELECTOR -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal"
+                    android:id="@+id/offsetSelector"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    >
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        >
+                        <ImageButton
+                            android:layout_width="32sp"
+                            android:layout_height="32sp"
+                            android:background="#00000000"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/arrow_left"
+                            android:id="@+id/offsetSelectorDown"
+                            android:layout_gravity="center_vertical"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-50%"
+                            android:textSize="@dimen/textSize_scale_limits"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/offsetLimitMin"
+                            />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        >
+                        <TextView
+                            android:layout_width="80sp"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            android:text="+20%"
+                            android:id="@+id/offsetText"
+                            android:layout_gravity="center_vertical"
+                            android:gravity="center"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="OFFSET"
+                            android:textSize="@dimen/textSize_scale_name"
+                            android:layout_gravity="center_horizontal"
+                            />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        >
+                        <ImageButton
+                            android:layout_width="32sp"
+                            android:layout_height="32sp"
+                            android:background="#00000000"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/arrow_right"
+                            android:id="@+id/offsetSelectorUp"
+                            android:layout_gravity="center_vertical"
+                            />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+50%"
+                            android:textSize="@dimen/textSize_scale_limits"
+                            android:layout_gravity="center_horizontal"
+                            android:id="@+id/offsetLimitMax"
+                            />
+                    </LinearLayout>
+                </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- cursors panel -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/cursorsPanel"
+            android:visibility="visible"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@id/triggerButton"
+            android:layout_toStartOf="@id/startStopButton"
+            >
+            <Button
+                android:layout_width="75sp"
+                android:layout_height="wrap_content"
+                style="?android:attr/buttonStyleSmall"
+                android:text="CURSO"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/cursorToggleButton"
+                />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginLeft="16sp"
+                >
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Voltage"
+                    android:id="@+id/cursorTypeText"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cursor 1: 2.2V"
+                    android:id="@+id/cursor1Text"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cursor 2: 1.2V"
+                    android:id="@+id/cursor2Text"
+                    />
+                </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16sp"
+                android:text="\u0394Y: 1.0V"
+                android:id="@+id/cursorsDataText"
+                />
+            </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>
 
 
 

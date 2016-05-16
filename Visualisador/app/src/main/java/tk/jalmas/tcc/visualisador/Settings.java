@@ -142,9 +142,13 @@ public class Settings {
     private static final char TIME_SCALE_1S =       0b00001111;
     private static final char TIME_SCALE_2S =       0b00010000;
 
-    private static final String[] TIME_SCALE_LABELS =
-        {"1us", "2us", "5us", "10us", "20us", "50us", "100us", "200us", "500us", "1ms",
-                "2ms", "5ms", "10ms", "20ms", "50ms", "100ms", "200ms"};
+    private static final Float[] TIME_SCALE_LABELS_VALUE =
+            {1f, 2.5f, 5f, 10f, 25f, 50f, 100f, 250f, 500f, 1f,
+                    2.5f, 5f, 10f, 25f, 50f, 100f, 250f};
+
+    private static final String[] TIME_SCALE_LABELS_UNIT =
+            {"us", "us", "us", "us", "us", "us", "us", "us", "us", "ms",
+                    "ms", "ms", "ms", "ms", "ms", "ms", "ms"};
 
     private static final int[] CONTINUOUS_MODE_BLOCK_SIZE =
         {1, 1, 1, 1, 2, 5, 10, 20, 50, 100, 200, 500, 500, 500, 500, 500, 500};
@@ -160,8 +164,16 @@ public class Settings {
         return (char) (((MASK_COMMAND & SET_TIME_SCALE) | (MASK_COMMAND_VALUE & currentTimeScale)) & 0xFF);
     }
 
-    public static String getCurrentTimeScaleLabel() {
-        return TIME_SCALE_LABELS[currentTimeScale];
+    public static String getCurrentTimeScaleCompleteLabel() {
+        return TIME_SCALE_LABELS_VALUE[currentTimeScale] + TIME_SCALE_LABELS_UNIT[currentTimeScale];
+    }
+
+    public static Float getCurrentTimeScaleLabelValue() {
+        return TIME_SCALE_LABELS_VALUE[currentTimeScale];
+    }
+
+    public static String getCurrentTimeScaleLabelUnit() {
+        return TIME_SCALE_LABELS_UNIT[currentTimeScale];
     }
 
     public static void increaseTimeScale() {
@@ -175,11 +187,11 @@ public class Settings {
     }
 
     public static String getMinTimeScaleLabel() {
-        return TIME_SCALE_LABELS[TIME_SCALE_10US];
+        return TIME_SCALE_LABELS_VALUE[TIME_SCALE_10US] + TIME_SCALE_LABELS_UNIT[TIME_SCALE_10US];
     }
 
     public static String getMaxTimeScaleLabel() {
-        return TIME_SCALE_LABELS[TIME_SCALE_2S];
+        return TIME_SCALE_LABELS_VALUE[TIME_SCALE_2S] + TIME_SCALE_LABELS_UNIT[TIME_SCALE_2S];
     }
 
 

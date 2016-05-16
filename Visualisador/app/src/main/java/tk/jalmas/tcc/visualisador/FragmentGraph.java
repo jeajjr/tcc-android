@@ -13,8 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Set;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,6 +30,13 @@ public class FragmentGraph extends Fragment {
     private TextView holdOffText;
     private TextView timeOffsetText;
     private TextView rxText;
+    private TextView cursorTypeText;
+    private TextView cursor1Text;
+    private TextView cursor2Text;
+    private TextView cursorsDataText;
+
+    private View selectorsPanel;
+    private View cursorsPanel;
 
     private int rxTextCount;
 
@@ -86,6 +91,13 @@ public class FragmentGraph extends Fragment {
         graph = (MySimpleGraph) v.findViewById(R.id.graph);
         graph.setMaxYValue(Settings.voltageScaleMax);
 
+        selectorsPanel = v.findViewById(R.id.selectorsPanel);
+        cursorsPanel = v.findViewById(R.id.cursorsPanel);
+        selectorsPanel.setVisibility(View.VISIBLE);
+        cursorsPanel.setVisibility(View.INVISIBLE);
+
+        setUpGraphOnCursorMovedListener(graph);
+
         bluetoothIcon = (ImageView) v.findViewById(R.id.bt_icon);
 
         triggerText = (TextView) v.findViewById(R.id.triggerText);
@@ -93,17 +105,22 @@ public class FragmentGraph extends Fragment {
         holdOffText = (TextView) v.findViewById(R.id.holdOffText);
         timeOffsetText = (TextView) v.findViewById(R.id.offsetText);
         rxText = (TextView) v.findViewById(R.id.rxText);
+        cursorTypeText = (TextView) v.findViewById(R.id.cursorTypeText);
+        cursor1Text = (TextView) v.findViewById(R.id.cursor1Text);
+        cursor2Text = (TextView) v.findViewById(R.id.cursor2Text);
+        cursorsDataText = (TextView) v.findViewById(R.id.cursorsDataText);
 
         updateTriggerText();
         updateTimeScaleText();
         updateHoldOffText();
         updateTimeOffsetText();
+        updateCursorTexts();
 
         updateScalesMinMaxValues(v);
 
         isGraphStopped = false;
 
-        timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
+        timeScaleText.setText(Settings.getCurrentTimeScaleCompleteLabel());
 
         receiver = new Receiver(getActivity());
         setUpReceiver(v);
@@ -113,10 +130,23 @@ public class FragmentGraph extends Fragment {
         refreshHandler = new Handler();
         refresherRunnable.run();
 
-        int i = 1;
         receiver.start();
 
         return v;
+    }
+
+    private void setUpGraphOnCursorMovedListener(MySimpleGraph graph) {
+        graph.setOnCursorMovedListener(new OnCursorMovedListener() {
+            @Override
+            public void onVoltageCursorMoved(float cursor1, float cursor2) {
+                updateCursorTexts();
+            }
+
+            @Override
+            public void onTimeCursorMoved(float cursor1, float cursor2) {
+                updateCursorTexts();
+            }
+        });
     }
 
     private void setUpButtonListeners(View v) {
@@ -242,12 +272,65 @@ public class FragmentGraph extends Fragment {
                 if (isGraphStopped) {
                     startStopButton.setText("START");
                     pauseIcon.setVisibility(View.VISIBLE);
+                    selectorsPanel.setVisibility(View.INVISIBLE);
+                    cursorsPanel.setVisibility(View.VISIBLE);
+                    graph.setGraphPaused(true);
+                    updateCursorTexts();
                 } else {
                     startStopButton.setText("STOP");
                     pauseIcon.setVisibility(View.INVISIBLE);
+                    selectorsPanel.setVisibility(View.VISIBLE);
+                    cursorsPanel.setVisibility(View.INVISIBLE);
+                    graph.setGraphPaused(false);
                 }
             }
         });
+
+        v.findViewById(R.id.cursorToggleButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                graph.toggleCurrentCursorsState();
+
+                updateCursorTexts();
+            }
+        });
+    }
+
+    private void updateCursorTexts() {
+        switch (graph.getCurrentCursorsState()) {
+            case VOLTAGE:
+                float[] voltCursors = graph.getVoltageCursors();
+                float[] voltCursorsValue = {
+                        voltCursors[0] * Settings.voltageScaleMax,
+                        voltCursors[1] * Settings.voltageScaleMax
+                };
+                cursorTypeText.setText("Voltage");
+                cursor1Text.setText(String.format("cursor 1: %.1fV", voltCursorsValue[0]));
+                cursor2Text.setText(String.format("cursor 2: %.1fV",voltCursorsValue[1]));
+                cursorsDataText.setText(String.format("\u0394Y: %.1fV",Math.abs(voltCursorsValue[1] - voltCursorsValue[0])));
+                break;
+
+            case TIME:
+                float[] timeCursors = graph.getTimeCursors();
+                float[] timeCursorsValue = {
+                        timeCursors[0] * graph.GRID_X_COUNT * Settings.getCurrentTimeScaleLabelValue(),
+                        timeCursors[1] * graph.GRID_X_COUNT * Settings.getCurrentTimeScaleLabelValue()
+                };
+                cursorTypeText.setText("Time");
+                cursor1Text.setText(String.format("cursor 1: %.1f%s", timeCursorsValue[0], Settings.getCurrentTimeScaleLabelUnit()));
+                cursor2Text.setText(String.format("cursor 2: %.1f%s", timeCursorsValue[1], Settings.getCurrentTimeScaleLabelUnit()));
+                cursorsDataText.setText(String.format("\u0394Y: %.1f%s",
+                        Math.abs(timeCursorsValue[1] - timeCursorsValue[0]),
+                        Settings.getCurrentTimeScaleLabelUnit()));
+                break;
+
+            case OFF:
+                cursorTypeText.setText("Off");
+                cursor1Text.setText("");
+                cursor2Text.setText("");
+                cursorsDataText.setText("");
+                break;
+        }
     }
 
     private void updateScalesMinMaxValues(View v) {
@@ -362,7 +445,7 @@ public class FragmentGraph extends Fragment {
     }
 
     private void updateTimeScaleText() {
-        timeScaleText.setText(Settings.getCurrentTimeScaleLabel());
+        timeScaleText.setText(Settings.getCurrentTimeScaleCompleteLabel());
     }
 
     private void updateHoldOffText() {

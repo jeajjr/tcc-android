@@ -13,14 +13,14 @@ public class MySimpleGraph extends View {
     public enum CURSORS_STATES {VOLTAGE, TIME, OFF}
     private CURSORS_STATES currentCursorsState;
 
-    private enum CURSOR_HANDLERS_STATES {NONE_SELECTED, VOLT0_SELECTED, VOLT1_SELECTED, TIME0_SELECTED, TIME1_SELECTED}
-    private CURSOR_HANDLERS_STATES currentCursorHandlerState;
+    private enum CURSOR_CLICK_STATES {NONE_SELECTED, VOLT0_SELECTED, VOLT1_SELECTED, TIME0_SELECTED, TIME1_SELECTED}
+    private CURSOR_CLICK_STATES currentCursorClickState;
 
     private boolean isGraphPaused;
     private float[] voltageCursorsPosition;         //current position in pixels over screen height
-    private float[] voltageCursorsHandlePosition;   //current position in pixels over screen width
     private float[] timeCursorsPosition;            //current position in pixels over screen width
-    private float[] timeCursorsHandlePosition;      //current position in pixels over screen height
+
+    private OnCursorMovedListener onCursorMovedListener;
 
     private DataPoint[] data;
 
@@ -37,25 +37,19 @@ public class MySimpleGraph extends View {
 
     private Paint gridPaint;
     private final int GRID_STROKE = 1;
-    private final int GRID_X_COUNT = 10;
-    private final int GRID_Y_COUNT = 8;
+    public final int GRID_X_COUNT = 10;
+    public final int GRID_Y_COUNT = 8;
 
     private Paint pointPaint;
     private final int POINT_RADIUS = 4;
     private final int POINT_STROKE = 2;
 
     private Paint cursorPaint;
-    private final int CURSOR_STROKE = 5;
+    private final int CURSOR_STROKE = 2;
 
     private Paint cursorClickedPaint;
-    private final int CURSOR_CLIKED_STROKE = 20;
-
-    private Paint cursorHandlePaint;
-    private final int CURSOR_HANDLE_RADIUS = 20;
-    private final int CURSOR_HANDLE_CLICKED_RADIUS = 100;
-
-    private Paint cursorHandleClickedPaint;
-    private final int CURSOR_HANDLE_CLIKED_RADIUS = 150;
+    private final int CURSOR_CLIKED_STROKE = 10;
+    private final int CURSOR_CLICK_DISTANCE = 80;
 
     public void init() {
         isLastPositionEnabled = false;
@@ -83,27 +77,16 @@ public class MySimpleGraph extends View {
         cursorClickedPaint.setColor(Color.BLUE);
         cursorClickedPaint.setStrokeWidth(CURSOR_CLIKED_STROKE);
 
-        cursorHandlePaint = new Paint();
-        cursorHandlePaint.setColor(Color.GRAY);
-        cursorHandlePaint.setStrokeWidth(CURSOR_HANDLE_RADIUS);
-
-        cursorHandleClickedPaint = new Paint();
-        cursorHandleClickedPaint.setColor(Color.GRAY);
-        cursorHandleClickedPaint.setStrokeWidth(CURSOR_HANDLE_CLICKED_RADIUS);
-
         this.setBackgroundColor(Color.WHITE);
 
         maxYValue = 0;
 
-        currentCursorsState = CURSORS_STATES.TIME; //TODO CURSORS_STATES.VOLTAGE;
-        currentCursorHandlerState = CURSOR_HANDLERS_STATES.NONE_SELECTED;
-        isGraphPaused = false; //TODO true;
+        currentCursorsState = CURSORS_STATES.OFF;
+        currentCursorClickState = CURSOR_CLICK_STATES.NONE_SELECTED;
+        isGraphPaused = false;
 
-        voltageCursorsPosition = new float[]{0.1f, 0.6f}; //TODO {0, 0};
-        voltageCursorsHandlePosition = new float[]{0.3f, 0.5f};
-
-        timeCursorsPosition = new float[]{0.1f, 0.6f}; //TODO {0, 0};
-        timeCursorsHandlePosition = new float[]{0.3f, 0.5f};
+        voltageCursorsPosition = new float[]{0.1f, 0.6f};
+        timeCursorsPosition = new float[]{0.1f, 0.6f};
     }
 
     public MySimpleGraph(Context context) {
@@ -188,89 +171,147 @@ public class MySimpleGraph extends View {
         }
 
         // Draw cursors
-        if (currentCursorsState == CURSORS_STATES.VOLTAGE) {
-            int voltCursor0Y = (int) (height * timeCursorsPosition[0]);
-            int voltCursor1Y = (int) (height * timeCursorsPosition[1]);
+        if (isGraphPaused) {
+            if (currentCursorsState == CURSORS_STATES.VOLTAGE) {
+                int voltCursor0Y = (int) (height * voltageCursorsPosition[0]);
+                int voltCursor1Y = (int) (height * voltageCursorsPosition[1]);
 
-            int voltCursorHandle0Y = (int) (width * voltageCursorsHandlePosition[0]);
-            int voltCursorHandle1Y = (int) (width * voltageCursorsHandlePosition[1]);
+                canvas.drawLine(
+                        AXIS_OFFSET, voltCursor0Y,
+                        width - AXIS_OFFSET, voltCursor0Y,
+                        (currentCursorClickState == CURSOR_CLICK_STATES.VOLT0_SELECTED) ?
+                                cursorClickedPaint :
+                                cursorPaint);
 
+                canvas.drawLine(
+                        AXIS_OFFSET, voltCursor1Y,
+                        width - AXIS_OFFSET, voltCursor1Y,
+                        (currentCursorClickState == CURSOR_CLICK_STATES.VOLT1_SELECTED) ?
+                                cursorClickedPaint :
+                                cursorPaint);
+            } else if (currentCursorsState == CURSORS_STATES.TIME) {
+                int timeCursor0Y = (int) (width * timeCursorsPosition[0]);
+                int timeCursor1Y = (int) (width * timeCursorsPosition[1]);
 
-            canvas.drawLine(
-                AXIS_OFFSET, voltCursor0Y,
-                width - AXIS_OFFSET, voltCursor0Y,
-                    (currentCursorHandlerState == CURSOR_HANDLERS_STATES.VOLT0_SELECTED) ?
-                            cursorClickedPaint :
-                            cursorPaint);
+                canvas.drawLine(
+                        timeCursor0Y,AXIS_OFFSET,
+                        timeCursor0Y, height - AXIS_OFFSET,
+                        (currentCursorClickState == CURSOR_CLICK_STATES.TIME0_SELECTED) ?
+                                cursorClickedPaint :
+                                cursorPaint);
 
-            canvas.drawCircle(voltCursorHandle0Y, voltCursor0Y,
-                    (currentCursorHandlerState == CURSOR_HANDLERS_STATES.VOLT0_SELECTED) ?
-                            CURSOR_HANDLE_CLICKED_RADIUS :
-                            CURSOR_HANDLE_RADIUS,
-                    (currentCursorHandlerState == CURSOR_HANDLERS_STATES.VOLT0_SELECTED) ?
-                        cursorHandleClickedPaint :
-                        cursorHandlePaint);
-
-            canvas.drawLine(
-                AXIS_OFFSET, voltCursor1Y,
-                width - AXIS_OFFSET, voltCursor1Y,
-                    cursorPaint);
-            canvas.drawCircle(voltCursorHandle1Y, voltCursor1Y, CURSOR_HANDLE_RADIUS, cursorHandlePaint);
-
-        }
-        else if (currentCursorsState == CURSORS_STATES.TIME) {
-
+                canvas.drawLine(
+                        timeCursor1Y, AXIS_OFFSET,
+                        timeCursor1Y, height - AXIS_OFFSET,
+                        (currentCursorClickState == CURSOR_CLICK_STATES.TIME1_SELECTED) ?
+                                cursorClickedPaint :
+                                cursorPaint);
+            }
         }
     }
 
-    private boolean detectHandleClick(double touchX, double touchY, double cursorX, double cursorY) {
-        System.out.println("distance: " + Math.sqrt(Math.pow(touchY - cursorY, 2.0) + Math.pow(touchX - cursorX, 2.0)));
-        return (Math.sqrt(Math.pow(touchY - cursorY, 2.0) + Math.pow(touchX - cursorX, 2.0)))
-                <= CURSOR_HANDLE_CLICKED_RADIUS;
+    private boolean detectHandleClick(double touchCoordinate, double cursorCoordinate) {
+        return (Math.abs(touchCoordinate - cursorCoordinate))
+                <= CURSOR_CLICK_DISTANCE;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
         if (isGraphPaused) {
-            System.out.println(event.getAction() + ": " + event.getX() + ", " + event.getY());
-
             float touchX = event.getX();
             float touchY = event.getY();
 
             int screenWidth = getWidth();
             int screenHeight = getHeight();
 
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-
+            switch(event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
                 System.out.println("ACTION_DOWN");
 
-                // Detect if it was on any cursor handle
-                if (detectHandleClick(touchX, touchY,
-                        voltageCursorsHandlePosition[0] * screenWidth, voltageCursorsPosition[0] * screenHeight)) {
-                    currentCursorHandlerState = CURSOR_HANDLERS_STATES.VOLT0_SELECTED;
-                    System.out.println("VOLT0_SELECTED");
+                boolean touchedHandle = false;
+
+                // Detect if it was on voltage cursor handle
+                if (currentCursorsState == CURSORS_STATES.VOLTAGE) {
+                    if (detectHandleClick(touchY, voltageCursorsPosition[0] * screenHeight)) {
+                        currentCursorClickState = CURSOR_CLICK_STATES.VOLT0_SELECTED;
+                        System.out.println("VOLT0_SELECTED");
+                        touchedHandle = true;
+                    } else if (detectHandleClick(touchY, voltageCursorsPosition[1] * screenHeight)) {
+                        currentCursorClickState = CURSOR_CLICK_STATES.VOLT1_SELECTED;
+                        System.out.println("VOLT1_SELECTED");
+                        touchedHandle = true;
+                    }
                 }
-                else {
-                    currentCursorHandlerState = CURSOR_HANDLERS_STATES.NONE_SELECTED;
+
+                // Detect if it was on voltage cursor handle
+                if (currentCursorsState == CURSORS_STATES.TIME) {
+                    if (detectHandleClick(touchX, timeCursorsPosition[0] * screenWidth)) {
+                        currentCursorClickState = CURSOR_CLICK_STATES.TIME0_SELECTED;
+                        System.out.println("TIME0_SELECTED");
+                        touchedHandle = true;
+
+                    } else if (detectHandleClick(touchX, timeCursorsPosition[1] * screenWidth)) {
+                        currentCursorClickState = CURSOR_CLICK_STATES.TIME1_SELECTED;
+                        System.out.println("TIME1_SELECTED");
+                        touchedHandle = true;
+                    }
+                }
+
+                if (!touchedHandle) {
+                    currentCursorClickState = CURSOR_CLICK_STATES.NONE_SELECTED;
                     System.out.println("NONE_SELECTED");
                 }
-            }
-            else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                switch (currentCursorHandlerState) {
+                break;
+            case MotionEvent.ACTION_MOVE:
+                System.out.println("ACTION_MOVE");
+
+                switch (currentCursorClickState) {
                     case VOLT0_SELECTED:
-
                         voltageCursorsPosition[0] = touchY / screenHeight;
-                        voltageCursorsHandlePosition[0] = touchX / screenWidth;
+                        if (voltageCursorsPosition[0] < 0) voltageCursorsPosition[0] = 0;
+                        if (voltageCursorsPosition[0] > 1) voltageCursorsPosition[0] = 1;
 
+                        if (onCursorMovedListener != null)
+                            onCursorMovedListener.onVoltageCursorMoved(voltageCursorsPosition[0], voltageCursorsPosition[1]);
+                        break;
+
+                    case VOLT1_SELECTED:
+                        voltageCursorsPosition[1] = touchY / screenHeight;
+                        if (voltageCursorsPosition[1] < 0) voltageCursorsPosition[1] = 0;
+                        if (voltageCursorsPosition[1] > 1) voltageCursorsPosition[1] = 1;
+
+                        if (onCursorMovedListener != null)
+                            onCursorMovedListener.onVoltageCursorMoved(voltageCursorsPosition[0], voltageCursorsPosition[1]);
+                        break;
+
+                    case TIME0_SELECTED:
+                        timeCursorsPosition[0] = touchX / screenWidth;
+                        if (timeCursorsPosition[0] < 0) timeCursorsPosition[0] = 0;
+                        if (timeCursorsPosition[0] > 1) timeCursorsPosition[0] = 1;
+
+                        if (onCursorMovedListener != null)
+                            onCursorMovedListener.onTimeCursorMoved(timeCursorsPosition[0], timeCursorsPosition[1]);
+                        break;
+
+                    case TIME1_SELECTED:
+                        timeCursorsPosition[1] = touchX / screenWidth;
+                        if (timeCursorsPosition[1] < 0) timeCursorsPosition[1] = 0;
+                        if (timeCursorsPosition[1] > 1) timeCursorsPosition[1] = 1;
+
+                        if (onCursorMovedListener != null)
+                            onCursorMovedListener.onTimeCursorMoved(timeCursorsPosition[0], timeCursorsPosition[1]);
                         break;
                 }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                System.out.println("ACTION_UP/ACTION_CANCEL");
+
+                currentCursorClickState = CURSOR_CLICK_STATES.NONE_SELECTED;
+                break;
             }
-                else if (event.getAction() == MotionEvent.ACTION_UP ||
-                     event.getAction() == MotionEvent.ACTION_CANCEL) {
-                currentCursorHandlerState = CURSOR_HANDLERS_STATES.NONE_SELECTED;
-            }
+
             this.invalidate();
         }
 
@@ -279,6 +320,8 @@ public class MySimpleGraph extends View {
 
     public void setGraphPaused(boolean graphPaused) {
         this.isGraphPaused = graphPaused;
+
+        this.invalidate();
     }
 
     public void toggleCurrentCursorsState() {
@@ -293,6 +336,11 @@ public class MySimpleGraph extends View {
                 currentCursorsState = CURSORS_STATES.VOLTAGE;
                 break;
         }
+        this.invalidate();
+    }
+
+    void setOnCursorMovedListener(OnCursorMovedListener onCursorMovedListener) {
+        this.onCursorMovedListener = onCursorMovedListener;
     }
 
     public CURSORS_STATES getCurrentCursorsState() {
@@ -309,7 +357,7 @@ public class MySimpleGraph extends View {
     /**
      * @return position of time cursors, in screen fraction (0 is the leftmost positon, 1 is the rightmost)
      */
-    public float[] getTImeCursors () {
+    public float[] getTimeCursors() {
         return timeCursorsPosition;
     }
 
@@ -324,6 +372,7 @@ public class MySimpleGraph extends View {
     public void updateData(DataPoint[] data, int lastPosition, char triggerLevelPercent) {
         this.data = data;
 
+        System.out.println(data.length);
         if (lastPosition != -1) {
             isLastPositionEnabled = true;
             this.lastPosition = lastPosition;

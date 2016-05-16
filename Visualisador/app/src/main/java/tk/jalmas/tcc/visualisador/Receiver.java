@@ -21,8 +21,8 @@ public class Receiver extends Thread {
     public enum STATES {CONTINUOUS, BULK_IN, BULK_OUT};
     private STATES currentState;
 
-    private final int[] SUB_ARRAY_OK = {'O', 'K'};
-    private final int SUB_ARRAY_LENGTH_OK = SUB_ARRAY_OK.length;
+    private final int[] SUB_ARRAY_EOM = {40, 80, 200};
+    private final int SUB_ARRAY_LENGTH_EOM = SUB_ARRAY_EOM.length;
     private final int[] SUB_ARRAY_USP_BK = {'U', 'S', 'P', 'B', 'K'};
     private final int SUB_ARRAY_LENGTH_USP_BK = SUB_ARRAY_USP_BK.length;
     private final int[] SUB_ARRAY_USP_OK = {'U', 'S', 'P', 'O', 'K'};
@@ -222,11 +222,11 @@ public class Receiver extends Thread {
     private void checkBuffer(){
         switch (currentState) {
             case CONTINUOUS:
-                if (updater != null && (buffIndex%25/*25*/ == 0))
+                if (updater != null && (buffIndex%25 == 0))
                     updater.onUpdate(
                             getSubArray(
                                     buffer,
-                                    (buffIndex/Settings.getCurrentBlockSize()) * Settings.getCurrentBlockSize() + Settings.getCurrentBlockSize(),
+                                    decrementIndex((buffIndex/Settings.getCurrentBlockSize()) * Settings.getCurrentBlockSize() + Settings.getCurrentBlockSize()),
                                     Settings.getCurrentBlockSize()),
                             buffIndex % Settings.getCurrentBlockSize());
 
@@ -264,12 +264,12 @@ public class Receiver extends Thread {
                         changeCurrentState(STATES.BULK_OUT);
                     }
 
-                if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_OK), SUB_ARRAY_OK)) {
+                if (isSubArrayEqual(getSubArray(buffer, buffIndex, SUB_ARRAY_LENGTH_EOM), SUB_ARRAY_EOM)) {
                     System.out.println("Detected end of message");
                     changeCurrentState(STATES.BULK_OUT);
-                    buffIndex = decrementIndex(buffIndex, SUB_ARRAY_LENGTH_OK);
+                    buffIndex = decrementIndex(buffIndex, SUB_ARRAY_LENGTH_EOM);
                     if (updater != null)
-                        updater.onUpdate(getSubArray(buffer, buffIndex, bulkMsgLen));
+                        updater.onUpdate(getSubArray(buffer, decrementIndex(buffIndex), bulkMsgLen));
                 }
 
                 break;
