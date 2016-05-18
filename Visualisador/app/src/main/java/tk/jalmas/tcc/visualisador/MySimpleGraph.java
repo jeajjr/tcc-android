@@ -348,10 +348,10 @@ public class MySimpleGraph extends View {
     }
 
     /**
-     * @return position of voltage cursors, in screen fraction (0 is the lowest positon, 1 is the highest)
+     * @return position of voltage cursors, in screen fraction (0 is the lowest position, 1 is the highest)
      */
     public float[] getVoltageCursors () {
-        return voltageCursorsPosition;
+        return new float[] {1.0f - voltageCursorsPosition[0], 1.0f - voltageCursorsPosition[1]};
     }
 
     /**
@@ -371,8 +371,12 @@ public class MySimpleGraph extends View {
 
     public void updateData(DataPoint[] data, int lastPosition, char triggerLevelPercent) {
         this.data = data;
-
+/*
         System.out.println(data.length);
+        for (DataPoint d : data)
+            System.out.print(d.y + " ");
+        System.out.println();
+*/
         if (lastPosition != -1) {
             isLastPositionEnabled = true;
             this.lastPosition = lastPosition;

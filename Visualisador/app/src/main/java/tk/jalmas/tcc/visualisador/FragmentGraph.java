@@ -33,7 +33,9 @@ public class FragmentGraph extends Fragment {
     private TextView cursorTypeText;
     private TextView cursor1Text;
     private TextView cursor2Text;
-    private TextView cursorsDataText;
+    private TextView cursorsDataText1;
+    private TextView cursorsDataText2;
+    private TextView timeScaleTextSmall;
 
     private View selectorsPanel;
     private View cursorsPanel;
@@ -89,14 +91,10 @@ public class FragmentGraph extends Fragment {
         View v = inflater.inflate(R.layout.fragment_graph, container, false);
 
         graph = (MySimpleGraph) v.findViewById(R.id.graph);
-        graph.setMaxYValue(Settings.voltageScaleMax);
 
         selectorsPanel = v.findViewById(R.id.selectorsPanel);
         cursorsPanel = v.findViewById(R.id.cursorsPanel);
-        selectorsPanel.setVisibility(View.VISIBLE);
-        cursorsPanel.setVisibility(View.INVISIBLE);
-
-        setUpGraphOnCursorMovedListener(graph);
+        timeScaleTextSmall = (TextView) v.findViewById(R.id.timeScaleTextSmall);
 
         bluetoothIcon = (ImageView) v.findViewById(R.id.bt_icon);
 
@@ -108,7 +106,17 @@ public class FragmentGraph extends Fragment {
         cursorTypeText = (TextView) v.findViewById(R.id.cursorTypeText);
         cursor1Text = (TextView) v.findViewById(R.id.cursor1Text);
         cursor2Text = (TextView) v.findViewById(R.id.cursor2Text);
-        cursorsDataText = (TextView) v.findViewById(R.id.cursorsDataText);
+        cursorsDataText1 = (TextView) v.findViewById(R.id.cursorsDataText1);
+        cursorsDataText2 = (TextView) v.findViewById(R.id.cursorsDataText2);
+        timeScaleTextSmall = (TextView) v.findViewById(R.id.timeScaleTextSmall);
+
+        graph.setMaxYValue(Settings.voltageScaleMax);
+
+        selectorsPanel.setVisibility(View.VISIBLE);
+        cursorsPanel.setVisibility(View.INVISIBLE);
+        timeScaleTextSmall.setVisibility(View.INVISIBLE);
+
+        setUpGraphOnCursorMovedListener(graph);
 
         updateTriggerText();
         updateTimeScaleText();
@@ -274,6 +282,7 @@ public class FragmentGraph extends Fragment {
                     pauseIcon.setVisibility(View.VISIBLE);
                     selectorsPanel.setVisibility(View.INVISIBLE);
                     cursorsPanel.setVisibility(View.VISIBLE);
+                    timeScaleTextSmall.setVisibility(View.VISIBLE);
                     graph.setGraphPaused(true);
                     updateCursorTexts();
                 } else {
@@ -281,6 +290,7 @@ public class FragmentGraph extends Fragment {
                     pauseIcon.setVisibility(View.INVISIBLE);
                     selectorsPanel.setVisibility(View.VISIBLE);
                     cursorsPanel.setVisibility(View.INVISIBLE);
+                    timeScaleTextSmall.setVisibility(View.INVISIBLE);
                     graph.setGraphPaused(false);
                 }
             }
@@ -307,7 +317,9 @@ public class FragmentGraph extends Fragment {
                 cursorTypeText.setText("Voltage");
                 cursor1Text.setText(String.format("cursor 1: %.1fV", voltCursorsValue[0]));
                 cursor2Text.setText(String.format("cursor 2: %.1fV",voltCursorsValue[1]));
-                cursorsDataText.setText(String.format("\u0394Y: %.1fV",Math.abs(voltCursorsValue[1] - voltCursorsValue[0])));
+                cursorsDataText1.setText(String.format("\u0394Y: %.1fV",Math.abs(voltCursorsValue[1] - voltCursorsValue[0])));
+                cursorsDataText2.setText("");
+                timeScaleTextSmall.setText("");
                 break;
 
             case TIME:
@@ -319,16 +331,34 @@ public class FragmentGraph extends Fragment {
                 cursorTypeText.setText("Time");
                 cursor1Text.setText(String.format("cursor 1: %.1f%s", timeCursorsValue[0], Settings.getCurrentTimeScaleLabelUnit()));
                 cursor2Text.setText(String.format("cursor 2: %.1f%s", timeCursorsValue[1], Settings.getCurrentTimeScaleLabelUnit()));
-                cursorsDataText.setText(String.format("\u0394Y: %.1f%s",
+                cursorsDataText1.setText(String.format("\u0394Y: %.1f%s",
                         Math.abs(timeCursorsValue[1] - timeCursorsValue[0]),
                         Settings.getCurrentTimeScaleLabelUnit()));
+
+                String frequencyScale = "";
+                switch (Settings.getCurrentTimeScaleLabelUnit()) {
+                    case "us":
+                        frequencyScale = "kHz";
+                        break;
+                    case "ms":
+                        frequencyScale = "Hz";
+                        break;
+                }
+                cursorsDataText2.setText(String.format("Freq: %.1f%s",
+                        1000f/Math.abs(timeCursorsValue[1] - timeCursorsValue[0]),
+                        frequencyScale));
+                timeScaleTextSmall.setText(String.format("%s/DIV", Settings.getCurrentTimeScaleCompleteLabel()));
+
                 break;
 
             case OFF:
                 cursorTypeText.setText("Off");
                 cursor1Text.setText("");
                 cursor2Text.setText("");
-                cursorsDataText.setText("");
+                cursorsDataText1.setText("");
+                cursorsDataText2.setText("");
+                timeScaleTextSmall.setText("");
+
                 break;
         }
     }

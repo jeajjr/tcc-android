@@ -71,15 +71,30 @@
                 />
         </LinearLayout>
 
-        <tk.jalmas.tcc.visualisador.MySimpleGraph
-            android:layout_width="0sp"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:id="@+id/graph"
+            android:orientation="vertical"
+            android:layout_weight="1"
             android:layout_marginLeft="12sp"
             android:layout_marginRight="12sp"
             android:layout_marginBottom="12sp"
-            android:layout_weight="1"
-            />
+            >
+            <tk.jalmas.tcc.visualisador.MySimpleGraph
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/graph"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-24sp"
+                android:layout_marginRight="4sp"
+                android:text="250.0ms/div"
+                android:id="@+id/timeScaleTextSmall"
+                android:layout_gravity="right"
+                />
+        </LinearLayout>
 
         <!-- Side indicators -->
         <LinearLayout
@@ -157,7 +172,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:id="@+id/selectorsPanel"
-            android:visibility="visible"
+            android:visibility="invisible"
             android:layout_alignParentBottom="true"
             android:layout_toRightOf="@id/triggerButton"
             android:layout_toLeftOf="@id/startStopButton"
@@ -452,14 +467,26 @@
                     />
                 </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16sp"
-                android:text="\u0394Y: 1.0V"
-                android:id="@+id/cursorsDataText"
-                />
-            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="16sp"
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="\u0394Y: 1.0V"
+                        android:id="@+id/cursorsDataText1"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Freq: 255kHz"
+                        android:id="@+id/cursorsDataText2"
+                        />
+                </LinearLayout>
+        </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
 
