@@ -151,7 +151,7 @@ public class Settings {
                     "ms", "ms", "ms", "ms", "ms", "ms", "ms"};
 
     private static final int[] CONTINUOUS_MODE_BLOCK_SIZE =
-        {1, 1, 1, 1, 2, 5, 10, 20, 50, 100, 200, 500, 500, 500, 500, 500, 500};
+        {2, 2, 2, 2, 2, 5, 10, 20, 50, 100, 200, 500, 500, 500, 500, 500, 500};
 
     private static char currentTimeScale = TIME_SCALE_500MS;
 

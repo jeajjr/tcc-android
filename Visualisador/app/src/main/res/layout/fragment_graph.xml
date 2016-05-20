@@ -25,8 +25,6 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:id="@+id/triggerSelector"
-
             >
             <LinearLayout
                 android:layout_width="match_parent"
@@ -34,6 +32,7 @@
                 android:orientation="vertical"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:id="@+id/triggerPanel"
                 >
                 <ImageButton
                     android:layout_width="32sp"

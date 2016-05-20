@@ -48,7 +48,6 @@ public class Receiver extends Thread {
      */
     private final int CONTINUOUS_MODE_PRINT_OFFSET = 10;
 
-
     private Updater updater;
     private StateListener stateListener;
     private OnSendingModeChangeListener modeChangeListener;
@@ -100,43 +99,42 @@ public class Receiver extends Thread {
 
     public void run() {
         Log.d(TAG, "init thread");
-        try {
-            while (!initConnection()) {
-                Thread.sleep(1000);
-                System.out.println("initConnection failed, trying again");
+        while (true) {
+            try {
+                while (!initConnection()) {
+                    Thread.sleep(1000);
+                    System.out.println("initConnection failed, trying again");
+                }
+
+                System.out.println("initConnection was successful");
+
+                dataIS = new DataInputStream(btSocket.getInputStream());
+                dataOS = new DataOutputStream(btSocket.getOutputStream());
+
+                Log.d(TAG, "got I/O streams");
+
+                while (true) {
+                    buffer[buffIndex] = readCharacters();
+
+                    if (stateListener != null)
+                        stateListener.onCharacterReceived();
+
+                    checkBuffer();
+
+                    buffIndex = incrementIndex(buffIndex);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+
+                if (stateListener != null) {
+                    stateListener.onBluetoothStateChanged(false);
+                    stateListener.onErrorOccurred();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("sleep failed");
+            } finally {
+                cleanup();
             }
-
-            System.out.println("initConnection was successful");
-
-            dataIS = new DataInputStream(btSocket.getInputStream());
-            dataOS = new DataOutputStream(btSocket.getOutputStream());
-
-            Log.d(TAG, "got I/O streams");
-
-            while (true) {
-                buffer[buffIndex] = readCharacters();
-
-                if (stateListener != null)
-                    stateListener.onCharacterReceived();
-
-                checkBuffer();
-
-                buffIndex = incrementIndex(buffIndex);
-            }
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-
-            if (stateListener != null) {
-                stateListener.onBluetoothStateChanged(false);
-                stateListener.onErrorOccurred();
-            }
-        }
-        catch (InterruptedException e) {
-            System.out.println("sleep failed");
-        }
-        finally {
-            cleanup();
         }
     }
 

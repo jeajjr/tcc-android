@@ -48,7 +48,7 @@ public class MySimpleGraph extends View {
     private final int CURSOR_STROKE = 2;
 
     private Paint cursorClickedPaint;
-    private final int CURSOR_CLIKED_STROKE = 10;
+    private final int CURSOR_CLIKED_STROKE = 4;
     private final int CURSOR_CLICK_DISTANCE = 80;
 
     public void init() {
@@ -227,19 +227,15 @@ public class MySimpleGraph extends View {
 
             switch(event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                System.out.println("ACTION_DOWN");
-
                 boolean touchedHandle = false;
 
                 // Detect if it was on voltage cursor handle
                 if (currentCursorsState == CURSORS_STATES.VOLTAGE) {
                     if (detectHandleClick(touchY, voltageCursorsPosition[0] * screenHeight)) {
                         currentCursorClickState = CURSOR_CLICK_STATES.VOLT0_SELECTED;
-                        System.out.println("VOLT0_SELECTED");
                         touchedHandle = true;
                     } else if (detectHandleClick(touchY, voltageCursorsPosition[1] * screenHeight)) {
                         currentCursorClickState = CURSOR_CLICK_STATES.VOLT1_SELECTED;
-                        System.out.println("VOLT1_SELECTED");
                         touchedHandle = true;
                     }
                 }
@@ -248,24 +244,19 @@ public class MySimpleGraph extends View {
                 if (currentCursorsState == CURSORS_STATES.TIME) {
                     if (detectHandleClick(touchX, timeCursorsPosition[0] * screenWidth)) {
                         currentCursorClickState = CURSOR_CLICK_STATES.TIME0_SELECTED;
-                        System.out.println("TIME0_SELECTED");
                         touchedHandle = true;
 
                     } else if (detectHandleClick(touchX, timeCursorsPosition[1] * screenWidth)) {
                         currentCursorClickState = CURSOR_CLICK_STATES.TIME1_SELECTED;
-                        System.out.println("TIME1_SELECTED");
                         touchedHandle = true;
                     }
                 }
 
                 if (!touchedHandle) {
                     currentCursorClickState = CURSOR_CLICK_STATES.NONE_SELECTED;
-                    System.out.println("NONE_SELECTED");
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                System.out.println("ACTION_MOVE");
-
                 switch (currentCursorClickState) {
                     case VOLT0_SELECTED:
                         voltageCursorsPosition[0] = touchY / screenHeight;
@@ -306,8 +297,6 @@ public class MySimpleGraph extends View {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                System.out.println("ACTION_UP/ACTION_CANCEL");
-
                 currentCursorClickState = CURSOR_CLICK_STATES.NONE_SELECTED;
                 break;
             }

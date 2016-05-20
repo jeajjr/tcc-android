@@ -39,6 +39,7 @@ public class FragmentGraph extends Fragment {
 
     private View selectorsPanel;
     private View cursorsPanel;
+    private View triggerPanel;
 
     private int rxTextCount;
 
@@ -94,6 +95,8 @@ public class FragmentGraph extends Fragment {
 
         selectorsPanel = v.findViewById(R.id.selectorsPanel);
         cursorsPanel = v.findViewById(R.id.cursorsPanel);
+        triggerPanel = v.findViewById(R.id.triggerPanel);
+
         timeScaleTextSmall = (TextView) v.findViewById(R.id.timeScaleTextSmall);
 
         bluetoothIcon = (ImageView) v.findViewById(R.id.bt_icon);
@@ -114,6 +117,7 @@ public class FragmentGraph extends Fragment {
 
         selectorsPanel.setVisibility(View.VISIBLE);
         cursorsPanel.setVisibility(View.INVISIBLE);
+        triggerPanel.setVisibility(View.VISIBLE);
         timeScaleTextSmall.setVisibility(View.INVISIBLE);
 
         setUpGraphOnCursorMovedListener(graph);
@@ -282,6 +286,7 @@ public class FragmentGraph extends Fragment {
                     pauseIcon.setVisibility(View.VISIBLE);
                     selectorsPanel.setVisibility(View.INVISIBLE);
                     cursorsPanel.setVisibility(View.VISIBLE);
+                    triggerPanel.setVisibility(View.INVISIBLE);
                     timeScaleTextSmall.setVisibility(View.VISIBLE);
                     graph.setGraphPaused(true);
                     updateCursorTexts();
@@ -290,6 +295,7 @@ public class FragmentGraph extends Fragment {
                     pauseIcon.setVisibility(View.INVISIBLE);
                     selectorsPanel.setVisibility(View.VISIBLE);
                     cursorsPanel.setVisibility(View.INVISIBLE);
+                    triggerPanel.setVisibility(View.VISIBLE);
                     timeScaleTextSmall.setVisibility(View.INVISIBLE);
                     graph.setGraphPaused(false);
                 }
