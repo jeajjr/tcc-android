@@ -62,7 +62,7 @@ public class MySimpleGraph extends View {
         axisPaint.setStrokeWidth(AXIS_STROKE);
 
         gridPaint = new Paint();
-        gridPaint.setColor(Color.BLACK);
+        gridPaint.setARGB(255, 0xB0, 0xB0, 0xB0);
         gridPaint.setStrokeWidth(GRID_STROKE);
 
         pointPaint = new Paint();
@@ -70,11 +70,11 @@ public class MySimpleGraph extends View {
         pointPaint.setStrokeWidth(POINT_STROKE);
 
         cursorPaint = new Paint();
-        cursorPaint.setColor(Color.BLUE);
+        cursorPaint.setColor(Color.BLACK);
         cursorPaint.setStrokeWidth(CURSOR_STROKE);
 
         cursorClickedPaint = new Paint();
-        cursorClickedPaint.setColor(Color.BLUE);
+        cursorClickedPaint.setColor(Color.BLACK);
         cursorClickedPaint.setStrokeWidth(CURSOR_CLIKED_STROKE);
 
         this.setBackgroundColor(Color.WHITE);

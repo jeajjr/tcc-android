@@ -198,22 +198,24 @@ public class Settings {
     /**************************************************
      *              TIME SCALE OFFSET
      *************************************************/
-    private static final char SET_TIME_OFFSET = 0b01100000;
 
-    private static final char TIME_OFFSET_MIN = 0b00000000;
-    private static final char TIME_OFFSET_MAX = 0b00001010;
+    private static final String[] TIME_OFFSET_LABELS = {"-50%", "-45%", "-40%", "-35%", "-30%", "-25%", "-20%",
+            "-15%", "-10%", "-5%", "0%", "+5%", "+10%", "+15%", "+20%", "+25%", "+30%", "+35%", "+40%", "+45%", "+50%"};
 
-    private static char currentTimeOffset = (TIME_OFFSET_MIN + TIME_OFFSET_MAX)/2;
+    private static final float[] TIME_OFFSET_FACTOR = {-0.50f, -0.45f, -0.40f, -0.35f, -0.30f, -0.25f, -0.20f, -0.15f,
+            -0.10f, -0.05f, +0.00f, +0.05f, +0.10f, +0.15f, +0.20f, +0.25f, +0.30f, +0.35f, +0.40f, +0.45f, +0.50f};
 
-    private static final String[] TIME_OFFSET_LABELS = {"-50%", "-40%", "-30%", "-20%", "-10%", "0%",
-            "+10%", "+20%", "+30%", "+40%", "+50%"};
+    private static final int TIME_OFFSET_MIN = 0;
+    private static final int TIME_OFFSET_MAX = TIME_OFFSET_LABELS.length - 1;
 
-    public static char composeTimeOffsetCommand() {
-        return (char) (((MASK_COMMAND & SET_TIME_OFFSET) | (MASK_COMMAND_VALUE & currentTimeOffset)) & 0xFF);
-    }
+    private static int currentTimeOffset = (TIME_OFFSET_MIN + TIME_OFFSET_MAX)/2;
 
     public static String getCurrentTimeOffsetLabel() {
         return TIME_OFFSET_LABELS[currentTimeOffset];
+    }
+
+    public static float getCurrentTimeOffsetFactor() {
+        return TIME_OFFSET_FACTOR[currentTimeOffset];
     }
 
     public static void increaseTimeOffset() {

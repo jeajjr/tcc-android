@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Set;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -36,14 +38,22 @@ public class FragmentGraph extends Fragment {
     private TextView cursorsDataText1;
     private TextView cursorsDataText2;
     private TextView timeScaleTextSmall;
+    private TextView triggerTextSmall;
 
-    private View selectorsPanel;
     private View cursorsPanel;
+    private View holdOffSelector;
+    private View timeScaleSelector;
     private View triggerPanel;
 
     private int rxTextCount;
 
+    private boolean onBulkMode;
+
     private boolean isGraphStopped;
+    private boolean updateRequest;
+
+    private int[] lastData;
+    private int lastPosition;
 
     private Handler refreshHandler = null;
     Runnable refresherRunnable = new Runnable() {
@@ -53,7 +63,6 @@ public class FragmentGraph extends Fragment {
                 updateTimeScaleOnDevice();
                 updateTriggerSettingsOnDevice();
                 updateHoldOffSettingOnDevice();
-                updateTimeOffsetSettingOnDevice();
             }
 
             refreshHandler.postDelayed(refresherRunnable, 2000);
@@ -65,19 +74,39 @@ public class FragmentGraph extends Fragment {
     }
 
     private void updateGraph(int[] data, int lastPosition){
-        if (isGraphStopped)
+        this.lastData = data;
+        this.lastPosition = lastPosition;
+
+        if (!updateRequest && isGraphStopped)
             return;
 
-        MySimpleGraph.DataPoint[] points = new MySimpleGraph.DataPoint[data.length];
-        for (int i = 0; i < data.length; i++)
-            points [i] = new MySimpleGraph.DataPoint((float) i,
-                    (float) (data[i] * Settings.deviceMaxVoltage / 256));
+        int dataLen = 0;
+        if (onBulkMode)
+            dataLen = data.length / 2;
+        else
+            dataLen = data.length;
 
+        MySimpleGraph.DataPoint[] points = new MySimpleGraph.DataPoint[dataLen];
+        for (int i = 0; i < dataLen; i++) {
+            int index = 0;
+
+            if (onBulkMode || updateRequest)
+                index = dataLen/2 + i + (int) (dataLen * Settings.getCurrentTimeOffsetFactor());
+            else
+                index = i;
+
+            if (i==0) System.out.println("min " + index);
+            if (i==dataLen-1) System.out.println("max " + index);
+
+            points[i] = new MySimpleGraph.DataPoint((float) i,
+                    (data[index] * Settings.deviceMaxVoltage / 256));
+        }
         if (lastPosition == -1)
             graph.updateData(points, Settings.getTriggerValuePercent());
         else
             graph.updateData(points, lastPosition, Settings.getTriggerValuePercent());
 
+        updateRequest = false;
     }
 
     private void updateGraph(int[] data){
@@ -93,11 +122,10 @@ public class FragmentGraph extends Fragment {
 
         graph = (MySimpleGraph) v.findViewById(R.id.graph);
 
-        selectorsPanel = v.findViewById(R.id.selectorsPanel);
+        holdOffSelector = v.findViewById(R.id.holdOffSelector);
+        timeScaleSelector = v.findViewById(R.id.timeScaleSelector);
         cursorsPanel = v.findViewById(R.id.cursorsPanel);
         triggerPanel = v.findViewById(R.id.triggerPanel);
-
-        timeScaleTextSmall = (TextView) v.findViewById(R.id.timeScaleTextSmall);
 
         bluetoothIcon = (ImageView) v.findViewById(R.id.bt_icon);
 
@@ -112,13 +140,14 @@ public class FragmentGraph extends Fragment {
         cursorsDataText1 = (TextView) v.findViewById(R.id.cursorsDataText1);
         cursorsDataText2 = (TextView) v.findViewById(R.id.cursorsDataText2);
         timeScaleTextSmall = (TextView) v.findViewById(R.id.timeScaleTextSmall);
+        triggerTextSmall = (TextView) v.findViewById(R.id.triggerTextSmall);
 
         graph.setMaxYValue(Settings.voltageScaleMax);
 
-        selectorsPanel.setVisibility(View.VISIBLE);
+        holdOffSelector.setVisibility(View.VISIBLE);
+        timeScaleSelector.setVisibility(View.VISIBLE);
         cursorsPanel.setVisibility(View.INVISIBLE);
         triggerPanel.setVisibility(View.VISIBLE);
-        timeScaleTextSmall.setVisibility(View.INVISIBLE);
 
         setUpGraphOnCursorMovedListener(graph);
 
@@ -131,6 +160,8 @@ public class FragmentGraph extends Fragment {
         updateScalesMinMaxValues(v);
 
         isGraphStopped = false;
+
+        onBulkMode = false;
 
         timeScaleText.setText(Settings.getCurrentTimeScaleCompleteLabel());
 
@@ -254,22 +285,22 @@ public class FragmentGraph extends Fragment {
         v.findViewById(R.id.offsetSelectorDown).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!isGraphStopped) {
-                    Settings.decreaseTimeOffset();
-                    updateTimeOffsetSettingOnDevice();
-                    updateTimeOffsetText();
-                }
+                Settings.decreaseTimeOffset();
+                updateTimeOffsetText();
+
+                updateRequest = true;
+                updateGraph(lastData);
             }
         });
 
         v.findViewById(R.id.offsetSelectorUp).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!isGraphStopped) {
-                    Settings.increaseTimeOffset();
-                    updateTimeOffsetSettingOnDevice();
-                    updateTimeOffsetText();
-                }
+                Settings.increaseTimeOffset();
+                updateTimeOffsetText();
+
+                updateRequest = true;
+                updateGraph(lastData);
             }
         });
 
@@ -282,21 +313,21 @@ public class FragmentGraph extends Fragment {
             public void onClick(View v) {
                 isGraphStopped = !isGraphStopped;
                 if (isGraphStopped) {
-                    startStopButton.setText("START");
+                    startStopButton.setText("RUN");
                     pauseIcon.setVisibility(View.VISIBLE);
-                    selectorsPanel.setVisibility(View.INVISIBLE);
+                    holdOffSelector.setVisibility(View.INVISIBLE);
+                    timeScaleSelector.setVisibility(View.INVISIBLE);
                     cursorsPanel.setVisibility(View.VISIBLE);
                     triggerPanel.setVisibility(View.INVISIBLE);
-                    timeScaleTextSmall.setVisibility(View.VISIBLE);
                     graph.setGraphPaused(true);
                     updateCursorTexts();
                 } else {
                     startStopButton.setText("STOP");
                     pauseIcon.setVisibility(View.INVISIBLE);
-                    selectorsPanel.setVisibility(View.VISIBLE);
+                    holdOffSelector.setVisibility(View.VISIBLE);
+                    timeScaleSelector.setVisibility(View.VISIBLE);
                     cursorsPanel.setVisibility(View.INVISIBLE);
                     triggerPanel.setVisibility(View.VISIBLE);
-                    timeScaleTextSmall.setVisibility(View.INVISIBLE);
                     graph.setGraphPaused(false);
                 }
             }
@@ -321,11 +352,10 @@ public class FragmentGraph extends Fragment {
                         voltCursors[1] * Settings.voltageScaleMax
                 };
                 cursorTypeText.setText("Voltage");
-                cursor1Text.setText(String.format("cursor 1: %.1fV", voltCursorsValue[0]));
-                cursor2Text.setText(String.format("cursor 2: %.1fV",voltCursorsValue[1]));
-                cursorsDataText1.setText(String.format("\u0394Y: %.1fV",Math.abs(voltCursorsValue[1] - voltCursorsValue[0])));
+                cursor1Text.setText(String.format("1: %.2fV", voltCursorsValue[0]));
+                cursor2Text.setText(String.format("2: %.2fV",voltCursorsValue[1]));
+                cursorsDataText1.setText(String.format("\u0394Y: %.2fV",Math.abs(voltCursorsValue[1] - voltCursorsValue[0])));
                 cursorsDataText2.setText("");
-                timeScaleTextSmall.setText("");
                 break;
 
             case TIME:
@@ -335,8 +365,8 @@ public class FragmentGraph extends Fragment {
                         timeCursors[1] * graph.GRID_X_COUNT * Settings.getCurrentTimeScaleLabelValue()
                 };
                 cursorTypeText.setText("Time");
-                cursor1Text.setText(String.format("cursor 1: %.1f%s", timeCursorsValue[0], Settings.getCurrentTimeScaleLabelUnit()));
-                cursor2Text.setText(String.format("cursor 2: %.1f%s", timeCursorsValue[1], Settings.getCurrentTimeScaleLabelUnit()));
+                cursor1Text.setText(String.format("1: %.1f%s", timeCursorsValue[0], Settings.getCurrentTimeScaleLabelUnit()));
+                cursor2Text.setText(String.format("2: %.1f%s", timeCursorsValue[1], Settings.getCurrentTimeScaleLabelUnit()));
                 cursorsDataText1.setText(String.format("\u0394Y: %.1f%s",
                         Math.abs(timeCursorsValue[1] - timeCursorsValue[0]),
                         Settings.getCurrentTimeScaleLabelUnit()));
@@ -353,17 +383,15 @@ public class FragmentGraph extends Fragment {
                 cursorsDataText2.setText(String.format("Freq: %.1f%s",
                         1000f/Math.abs(timeCursorsValue[1] - timeCursorsValue[0]),
                         frequencyScale));
-                timeScaleTextSmall.setText(String.format("%s/DIV", Settings.getCurrentTimeScaleCompleteLabel()));
 
                 break;
 
             case OFF:
-                cursorTypeText.setText("Off");
+                cursorTypeText.setText("Cursors off");
                 cursor1Text.setText("");
                 cursor2Text.setText("");
                 cursorsDataText1.setText("");
                 cursorsDataText2.setText("");
-                timeScaleTextSmall.setText("");
 
                 break;
         }
@@ -453,6 +481,8 @@ public class FragmentGraph extends Fragment {
         receiver.setOnChangeSendingModeListener(new OnSendingModeChangeListener() {
             @Override
             public void onChangeToBulk() {
+                onBulkMode = true;
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -463,6 +493,8 @@ public class FragmentGraph extends Fragment {
 
             @Override
             public void onChangeToContinuous() {
+                onBulkMode = false;
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -477,11 +509,13 @@ public class FragmentGraph extends Fragment {
         int triggerPercent = Settings.getTriggerValuePercent();
 
         triggerText.setText(String.format("%.1fV", (float) (((double) triggerPercent) * 4.0 / 100.0)));
+        triggerTextSmall.setText("Trigger: " + triggerText.getText());
 
     }
 
     private void updateTimeScaleText() {
         timeScaleText.setText(Settings.getCurrentTimeScaleCompleteLabel());
+        timeScaleTextSmall.setText(timeScaleText.getText() + "/div");
     }
 
     private void updateHoldOffText() {
@@ -502,19 +536,9 @@ public class FragmentGraph extends Fragment {
             receiver.sendCommand(Settings.composeHoldOffCommand());
     }
 
-    private void updateTimeOffsetSettingOnDevice() {
-        if (receiver != null)
-            receiver.sendCommand(Settings.composeTimeOffsetCommand());
-    }
-
     private void updateTriggerSettingsOnDevice() {
         if (receiver != null)
             receiver.sendCommand(Settings.composeTriggerCommand());
-    }
-
-    private void updateSettingOnDevice(char command) {
-        if (receiver != null)
-            receiver.sendCommand(command);
     }
 
     private void showErrorDialog() {

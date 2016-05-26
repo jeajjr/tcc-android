@@ -32,8 +32,7 @@ public class Receiver extends Thread {
     private int buffIndex;
     private int currentMessageStart;
 
-    private final int BUFFER_SIZE = 500 * 4;
-    private final int CONTINUOUS_BLOCK_SIZE = 1000;
+    private final int BUFFER_SIZE = 512 * 8;
 
     // index where the first byte of the message length is
     private final int LENGTH_START_INDEX =  3;
@@ -69,10 +68,6 @@ public class Receiver extends Thread {
 
         btSocket = null;
 
-        if (BUFFER_SIZE % CONTINUOUS_BLOCK_SIZE != 0) {
-            System.out.println("Error: BUFFER_SIZE must be a multiple of CONTINUOUS_BLOCK_SIZE");
-            System.exit(1);
-        }
         buffer = new int[BUFFER_SIZE];
         for (int i=0; i<BUFFER_SIZE; i++)
             buffer[i] = 0;
@@ -218,6 +213,9 @@ public class Receiver extends Thread {
     }
 
     private void checkBuffer(){
+        boolean incrementIndex = true;
+
+
         switch (currentState) {
             case CONTINUOUS:
                 if (updater != null && (buffIndex%25 == 0))

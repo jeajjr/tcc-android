@@ -84,15 +84,7 @@
                 android:layout_height="match_parent"
                 android:id="@+id/graph"
                 />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="-24sp"
-                android:layout_marginRight="4sp"
-                android:text="250.0ms/div"
-                android:id="@+id/timeScaleTextSmall"
-                android:layout_gravity="right"
-                />
+
         </LinearLayout>
 
         <!-- Side indicators -->
@@ -171,7 +163,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:id="@+id/selectorsPanel"
-            android:visibility="invisible"
             android:layout_alignParentBottom="true"
             android:layout_toRightOf="@id/triggerButton"
             android:layout_toLeftOf="@id/startStopButton"
@@ -184,6 +175,7 @@
                     android:gravity="center_horizontal"
                     android:id="@+id/holdOffSelector"
                     android:layout_weight="1"
+                    android:visibility="invisible"
                     android:layout_gravity="center_vertical"
                     >
                     <LinearLayout
@@ -260,6 +252,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:visibility="invisible"
                     android:orientation="horizontal"
                     android:gravity="center_horizontal"
                     android:id="@+id/timeScaleSelector"
@@ -485,6 +478,25 @@
                         android:id="@+id/cursorsDataText2"
                         />
                 </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="16sp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="250.0ms/div"
+                android:id="@+id/timeScaleTextSmall"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trigger level: 2.0V"
+                android:id="@+id/triggerTextSmall"
+                />
+            </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
