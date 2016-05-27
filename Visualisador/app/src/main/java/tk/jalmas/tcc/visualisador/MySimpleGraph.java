@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -51,6 +52,8 @@ public class MySimpleGraph extends View {
     private final int CURSOR_CLIKED_STROKE = 4;
     private final int CURSOR_CLICK_DISTANCE = 80;
 
+    private Drawable triggerArrowIcon;
+
     public void init() {
         isLastPositionEnabled = false;
         lastPosition = 0;
@@ -87,6 +90,8 @@ public class MySimpleGraph extends View {
 
         voltageCursorsPosition = new float[]{0.1f, 0.6f};
         timeCursorsPosition = new float[]{0.1f, 0.6f};
+
+        triggerArrowIcon = getResources().getDrawable(R.drawable.trigger_arrow, null);
     }
 
     public MySimpleGraph(Context context) {
@@ -207,6 +212,14 @@ public class MySimpleGraph extends View {
                                 cursorClickedPaint :
                                 cursorPaint);
             }
+        }
+
+        if (!isLastPositionEnabled) {
+            int arrowSize = height / 15;
+            int x = (int) (width / 2 - Settings.getCurrentTimeOffsetFactor() * width - arrowSize / 2);
+            triggerArrowIcon.setBounds(x, 0,
+                    x + arrowSize, arrowSize);
+            triggerArrowIcon.draw(canvas);
         }
     }
 

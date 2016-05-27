@@ -91,7 +91,7 @@ public class FragmentGraph extends Fragment {
             int index = 0;
 
             if (onBulkMode || updateRequest)
-                index = dataLen/2 + i + (int) (dataLen * Settings.getCurrentTimeOffsetFactor());
+                index = dataLen / 2 + i + (int) (dataLen * Settings.getCurrentTimeOffsetFactor());
             else
                 index = i;
 
