@@ -182,12 +182,12 @@ public class Settings {
     }
 
     public static void decreaseTimeScale() {
-        if (currentTimeScale != TIME_SCALE_10US)
+        if (currentTimeScale != TIME_SCALE_1MS)
             currentTimeScale--;
     }
 
     public static String getMinTimeScaleLabel() {
-        return TIME_SCALE_LABELS_VALUE[TIME_SCALE_10US] + TIME_SCALE_LABELS_UNIT[TIME_SCALE_10US];
+        return TIME_SCALE_LABELS_VALUE[TIME_SCALE_1MS] + TIME_SCALE_LABELS_UNIT[TIME_SCALE_1MS];
     }
 
     public static String getMaxTimeScaleLabel() {
@@ -241,7 +241,7 @@ public class Settings {
      *************************************************/
     public static final float voltageScaleMax = 4.0f;
 
-    public static final float deviceMaxVoltage = 3.3f;
+    public static final float deviceMaxVoltage = 3.33f;
 
 
     /*********************************

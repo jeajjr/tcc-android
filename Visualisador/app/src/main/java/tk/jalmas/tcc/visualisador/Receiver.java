@@ -218,7 +218,7 @@ public class Receiver extends Thread {
 
         switch (currentState) {
             case CONTINUOUS:
-                if (updater != null && (buffIndex%25 == 0))
+                if (updater != null && (buffIndex%50 == 0))
                     updater.onUpdate(
                             getSubArray(
                                     buffer,

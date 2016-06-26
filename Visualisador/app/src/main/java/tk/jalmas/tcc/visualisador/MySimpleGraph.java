@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -91,7 +92,10 @@ public class MySimpleGraph extends View {
         voltageCursorsPosition = new float[]{0.1f, 0.6f};
         timeCursorsPosition = new float[]{0.1f, 0.6f};
 
-        triggerArrowIcon = getResources().getDrawable(R.drawable.trigger_arrow, null);
+        if (Build.VERSION.SDK_INT >= 21)
+            triggerArrowIcon = getResources().getDrawable(R.drawable.trigger_arrow, null);
+        else
+            triggerArrowIcon = getResources().getDrawable(R.drawable.trigger_arrow);
     }
 
     public MySimpleGraph(Context context) {

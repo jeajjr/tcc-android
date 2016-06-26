@@ -74,8 +74,12 @@ public class FragmentGraph extends Fragment {
     }
 
     private void updateGraph(int[] data, int lastPosition){
-        this.lastData = data;
-        this.lastPosition = lastPosition;
+
+
+        //if (!isGraphStopped) {
+            this.lastData = data;
+            this.lastPosition = lastPosition;
+        //}
 
         if (!updateRequest && isGraphStopped)
             return;
@@ -84,8 +88,13 @@ public class FragmentGraph extends Fragment {
         if (onBulkMode)
             dataLen = data.length / 2;
         else
-            dataLen = data.length;
+            dataLen = data.length - 1;
 
+        if (onBulkMode) {
+            for (int i : data)
+                System.out.print(i + " ");
+            System.out.println();
+        }
         MySimpleGraph.DataPoint[] points = new MySimpleGraph.DataPoint[dataLen];
         for (int i = 0; i < dataLen; i++) {
             int index = 0;
@@ -95,11 +104,13 @@ public class FragmentGraph extends Fragment {
             else
                 index = i;
 
-            if (i==0) System.out.println("min " + index);
-            if (i==dataLen-1) System.out.println("max " + index);
+            if (index >= data.length)
+                index = data.length - 1;
+            else if (index < 0)
+                index = 0;
 
             points[i] = new MySimpleGraph.DataPoint((float) i,
-                    (data[index] * Settings.deviceMaxVoltage / 256));
+                    (data[index] * Settings.deviceMaxVoltage / 256.0f));
         }
         if (lastPosition == -1)
             graph.updateData(points, Settings.getTriggerValuePercent());
